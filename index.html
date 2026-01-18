@@ -6,296 +6,212 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-:root{
-  --main:#7b1e1e;
-  --accent:#d35400;
-  --bg:#fff7f2;
-}
-
-body{
-  margin:0;
-  font-family:Arial;
-  background:var(--bg);
-}
-
-/* HEADER */
-header{
-  position:sticky;
-  top:0;
-  z-index:1000;
-  background:var(--main);
-  color:#fff;
-  padding:12px 20px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px;
-  cursor:pointer;
-}
-
-.logo{
-  height:40px;
-  background:#fff;
-  padding:4px;
-  border-radius:6px;
-}
-
-header a{
-  color:white;
-  margin-left:14px;
-  text-decoration:none;
-  font-weight:bold;
-}
-
-/* SECTIONS */
-section{ padding:25px; }
-.hidden{ display:none; }
-
-/* PRODUCTS */
-.products{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:20px;
-}
-
-.card{
-  background:#fff;
-  border-radius:10px;
-  box-shadow:0 4px 10px #0002;
-  padding:15px;
-  text-align:center;
-}
-
-.card img{
-  width:100%;
-  height:180px;
-  object-fit:cover;
-  border-radius:8px;
-}
-
-button{
-  background:var(--accent);
-  border:none;
-  color:#fff;
-  padding:10px;
-  border-radius:6px;
-  cursor:pointer;
-  width:100%;
-  margin-top:8px;
-}
-
-input,select{
-  padding:10px;
-  width:100%;
-  margin:8px 0;
-  border-radius:6px;
-  border:1px solid #ccc;
-}
-
-/* CART */
-.cart-item{
-  display:flex;
-  justify-content:space-between;
-  margin:10px 0;
-}
-
-/* ADMIN */
-.admin{
-  background:white;
-  padding:15px;
-  border-radius:8px;
-  margin-bottom:20px;
-}
-
-/* WHATSAPP FLOAT */
-.whatsapp-float{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#25D366;
-  color:white;
-  padding:15px 18px;
-  border-radius:50%;
-  font-size:22px;
-  text-decoration:none;
-  box-shadow:0 4px 10px #0003;
-}
+:root{--main:#7b1e1e;--accent:#d35400}
+body{margin:0;font-family:Arial;background:#fff7f2}
+header{position:sticky;top:0;z-index:10;background:var(--main);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+.brand{display:flex;align-items:center;gap:10px;cursor:pointer}
+.logo{height:40px;background:#fff;padding:4px;border-radius:6px}
+header a{color:#fff;margin-left:15px;font-weight:bold;cursor:pointer;text-decoration:none}
+section{padding:25px}
+.hidden{display:none}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.card{background:#fff;border-radius:10px;box-shadow:0 4px 10px #0002;padding:15px;text-align:center}
+.card img{width:100%;height:180px;object-fit:cover;border-radius:8px}
+button{background:var(--accent);color:#fff;border:none;padding:10px;border-radius:6px;width:100%;cursor:pointer}
+input,select{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ccc}
+.cart-item{display:flex;justify-content:space-between;margin:10px 0}
+.admin{background:#fff;padding:15px;border-radius:8px;margin-bottom:20px}
+.whatsapp{position:fixed;bottom:20px;right:20px;background:#25D366;color:white;padding:15px;border-radius:50%;font-size:22px;text-decoration:none}
 </style>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+import { getFirestore, collection, addDoc, getDocs } 
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* 🔥 YOUR FIREBASE CONFIG */
+const firebaseConfig = {
+ apiKey: "AIzaSyA871BbtKAIFdOEIbzCZG7GWAtStNSy8IA",
+ authDomain: "the-aachar-port.firebaseapp.com",
+ projectId: "the-aachar-port",
+ storageBucket: "the-aachar-port.firebasestorage.app",
+ messagingSenderId: "118992341724",
+ appId: "1:118992341724:web:4de7c1fdf5b30f822f0219",
+ measurementId: "G-V5NT7SLS4P"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* ---------- GLOBAL ---------- */
+let cart=[];
+let coupons=[];
+let discount=0;
+let currentUser=null;
+
+/* ---------- UI ---------- */
+window.show=id=>{
+ document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
+ document.getElementById(id).classList.remove("hidden");
+};
+
+/* ---------- AUTH ---------- */
+window.login=async()=>{
+ const email=document.getElementById("userEmail").value;
+ await signInWithEmailAndPassword(auth,email,"123456");
+ alert("Login success");
+ show("cart");
+};
+
+onAuthStateChanged(auth,u=>currentUser=u);
+
+/* ---------- LOAD PRODUCTS ---------- */
+const productList=document.getElementById("productList");
+const psnap=await getDocs(collection(db,"products"));
+psnap.forEach(d=>{
+ const p=d.data();
+ productList.innerHTML+=`
+ <div class="card">
+ <img src="${p.image}">
+ <h3>${p.name}</h3>
+ <p>₹${p.price}</p>
+ <button onclick="addCart('${d.id}',${p.price})">Add to Cart</button>
+ </div>`;
+});
+
+/* ---------- CART ---------- */
+window.addCart=(id,price)=>{
+ const i=cart.find(x=>x.id===id);
+ i?i.qty++:cart.push({id,price,qty:1});
+ renderCart();
+};
+
+function renderCart(){
+ let t=0;cartItems.innerHTML="";
+ cart.forEach(c=>{
+  t+=c.price*c.qty;
+  cartItems.innerHTML+=`
+  <div class="cart-item">Item x ${c.qty}<b>₹${c.price*c.qty}</b></div>`;
+ });
+ total.innerText=t-discount;
+ cartCount.innerText=cart.length;
+}
+window.totalCalc=()=>cart.reduce((s,c)=>s+c.price*c.qty,0);
+
+/* ---------- COUPONS ---------- */
+const csnap=await getDocs(collection(db,"coupons"));
+csnap.forEach(d=>coupons.push(d.data()));
+
+window.applyCoupon=()=>{
+ const c=coupons.find(x=>x.code===couponCode.value.toUpperCase());
+ if(!c) return alert("Invalid coupon");
+ discount=c.type==="percent"?totalCalc()*c.value/100:c.value;
+ discountText.innerText="Discount ₹"+discount;
+ renderCart();
+};
+
+/* ---------- CHECKOUT ---------- */
+window.checkout=async()=>{
+ if(!currentUser) return alert("Login first");
+
+ const order={
+  user:currentUser.email,
+  cart,
+  total:totalCalc()-discount,
+  created:new Date()
+ };
+
+ await addDoc(collection(db,"orders"),order);
+
+ window.open(`https://wa.me/918383897693?text=Order confirmed! Total ₹${order.total}`);
+ alert("Order placed successfully");
+
+ cart=[];discount=0;renderCart();loadOrders();
+};
+
+/* ---------- ADMIN ---------- */
+const ordersDiv=document.getElementById("ordersDiv");
+async function loadOrders(){
+ ordersDiv.innerHTML="";
+ const osnap=await getDocs(collection(db,"orders"));
+ osnap.forEach(d=>{
+  const o=d.data();
+  ordersDiv.innerHTML+=`
+  <p>${o.user} | ₹${o.total}</p>`;
+ });
+}
+loadOrders();
+
+window.addCoupon=async()=>{
+ await addDoc(collection(db,"coupons"),{
+  code:cCode.value.toUpperCase(),
+  type:cType.value,
+  value:+cVal.value
+ });
+ alert("Coupon added");
+};
+</script>
 </head>
 
 <body>
 
 <header>
-  <div class="brand" onclick="show('home')">
-    <img class="logo"
-      src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4hb9BQ32bcBMFLPT_Jpjl3jkY3QOXWtDO9N8rT6Y3wCvDzfa2RW56j5tsIQ14BUrSmyMK-HC8TAPoPUuxnnPwsCe7pQD_2lo8YDP4XyXZ3duWdNLhb9ea-TfP64pvcAw6UC-W9RT9FlaH5CVAeqge8RCB7lSIs5Iyvhx3y1msvaJRHa6iiwaGKuqkmc3n/s1024/IMG_2018.png">
-    <b>The Aachar Port</b>
-  </div>
-  <div>
-    <a onclick="show('home')">Home</a>
-    <a onclick="show('cart')">Cart (<span id="cartCount">0</span>)</a>
-    <a onclick="show('login')">Login</a>
-    <a onclick="show('admin')">Admin</a>
-  </div>
+<div class="brand" onclick="show('home')">
+<img class="logo" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4hb9BQ32bcBMFLPT_Jpjl3jkY3QOXWtDO9N8rT6Y3wCvDzfa2RW56j5tsIQ14BUrSmyMK-HC8TAPoPUuxnnPwsCe7pQD_2lo8YDP4XyXZ3duWdNLhb9ea-TfP64pvcAw6UC-W9RT9FlaH5CVAeqge8RCB7lSIs5Iyvhx3y1msvaJRHa6iiwaGKuqkmc3n/s1024/IMG_2018.png">
+<b>The Aachar Port</b>
+</div>
+<div>
+<a onclick="show('home')">Home</a>
+<a onclick="show('cart')">Cart (<span id="cartCount">0</span>)</a>
+<a onclick="show('login')">Login</a>
+<a onclick="show('admin')">Admin</a>
+</div>
 </header>
 
-<!-- HOME -->
 <section id="home">
-  <h2>Our Handmade Aachars</h2>
-  <div class="products" id="productList"></div>
+<h2>Our Handmade Aachars</h2>
+<div class="products" id="productList"></div>
 </section>
 
-<!-- CART -->
 <section id="cart" class="hidden">
-  <h2>Your Cart</h2>
-  <div id="cartItems"></div>
-  <h3>Total ₹<span id="total">0</span></h3>
-
-  <input id="couponCode" placeholder="Coupon Code">
-  <button onclick="applyCoupon()">Apply Coupon</button>
-  <p id="discountText"></p>
-
-  <button onclick="checkout()">Place Order</button>
+<h2>Your Cart</h2>
+<div id="cartItems"></div>
+<h3>Total ₹<span id="total">0</span></h3>
+<input id="couponCode" placeholder="Coupon Code">
+<button onclick="applyCoupon()">Apply Coupon</button>
+<p id="discountText"></p>
+<button onclick="checkout()">Place Order</button>
 </section>
 
-<!-- LOGIN -->
 <section id="login" class="hidden">
-  <h2>Customer Login</h2>
-  <input id="userEmail" placeholder="Email">
-  <button onclick="login()">Login</button>
+<h2>Customer Login</h2>
+<input id="userEmail" placeholder="Email">
+<button onclick="login()">Login</button>
 </section>
 
-<!-- ADMIN -->
 <section id="admin" class="hidden">
-  <h2>Admin Panel</h2>
-
-  <div class="admin">
-    <h3>Add Coupon</h3>
-    <input id="cCode" placeholder="Code">
-    <select id="cType">
-      <option value="percent">Percent</option>
-      <option value="flat">Flat</option>
-    </select>
-    <input id="cVal" placeholder="Value">
-    <button onclick="addCoupon()">Add Coupon</button>
-  </div>
-
-  <div class="admin">
-    <h3>Orders</h3>
-    <div id="ordersDiv"></div>
-  </div>
+<h2>Admin Panel</h2>
+<div class="admin">
+<h3>Add Coupon</h3>
+<input id="cCode" placeholder="Code">
+<select id="cType">
+<option value="percent">Percent</option>
+<option value="flat">Flat</option>
+</select>
+<input id="cVal" placeholder="Value">
+<button onclick="addCoupon()">Add Coupon</button>
+</div>
+<div class="admin">
+<h3>Orders</h3>
+<div id="ordersDiv"></div>
+</div>
 </section>
 
-<!-- WHATSAPP FLOAT -->
-<a class="whatsapp-float"
-   href="https://wa.me/918383897693"
-   target="_blank">🟢</a>
-
-<script>
-/* DATA */
-const products=[
-{id:1,name:"Spicy Mango Aachar",price:249,img:"https://images.unsplash.com/photo-1625938146367-77f3ec59c8c0"},
-{id:2,name:"Lemon Aachar",price:199,img:"https://images.unsplash.com/photo-1590080876454-9b5d8a92b9fd"},
-{id:3,name:"Mixed Veg Aachar",price:299,img:"https://images.unsplash.com/photo-1601050690597-df0568f70950"}
-];
-
-let cart=JSON.parse(localStorage.getItem("cart"))||[];
-let coupons=JSON.parse(localStorage.getItem("coupons"))||[];
-let orders=JSON.parse(localStorage.getItem("orders"))||[];
-let user=localStorage.getItem("user");
-let discount=0;
-
-/* NAV */
-function show(id){
-document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
-document.getElementById(id).classList.remove("hidden");
-}
-
-/* PRODUCTS */
-productList.innerHTML="";
-products.forEach(p=>{
-productList.innerHTML+=`
-<div class="card">
-<img src="${p.img}">
-<h3>${p.name}</h3>
-<p>₹${p.price}</p>
-<button onclick="addCart(${p.id})">Add to Cart</button>
-</div>`;
-});
-
-/* CART */
-function addCart(id){
-const i=cart.find(x=>x.id===id);
-i?i.qty++:cart.push({id,qty:1});
-saveCart();
-}
-function saveCart(){
-localStorage.setItem("cart",JSON.stringify(cart));
-renderCart();
-}
-function renderCart(){
-let t=0;cartItems.innerHTML="";
-cart.forEach(c=>{
-const p=products.find(x=>x.id===c.id);
-t+=p.price*c.qty;
-cartItems.innerHTML+=`
-<div class="cart-item">${p.name} x ${c.qty}<b>₹${p.price*c.qty}</b></div>`;
-});
-total.innerText=t-discount;
-cartCount.innerText=cart.length;
-}
-renderCart();
-
-/* COUPON */
-function addCoupon(){
-coupons.push({code:cCode.value.toUpperCase(),type:cType.value,value:+cVal.value});
-localStorage.setItem("coupons",JSON.stringify(coupons));
-alert("Coupon Added");
-}
-function applyCoupon(){
-const c=coupons.find(x=>x.code===couponCode.value.toUpperCase());
-if(!c)return alert("Invalid");
-discount=c.type==="percent"?totalCalc()*c.value/100:c.value;
-discountText.innerText="Discount ₹"+discount;
-renderCart();
-}
-function totalCalc(){
-return cart.reduce((s,c)=>s+products.find(p=>p.id===c.id).price*c.qty,0);
-}
-
-/* LOGIN */
-function login(){
-user=userEmail.value;
-localStorage.setItem("user",user);
-alert("Logged in");
-show("cart");
-}
-
-/* CHECKOUT */
-function checkout(){
-if(!user)return alert("Login first");
-const order={id:"ORD"+Date.now(),user,total:totalCalc()-discount};
-orders.push(order);
-localStorage.setItem("orders",JSON.stringify(orders));
-window.open(`https://wa.me/918383897693?text=Order ${order.id} Total ₹${order.total}`);
-alert("Order placed");
-cart=[];discount=0;saveCart();loadOrders();
-}
-
-/* ADMIN */
-function loadOrders(){
-ordersDiv.innerHTML="";
-orders.forEach(o=>{
-ordersDiv.innerHTML+=`<p>${o.id} | ${o.user} | ₹${o.total}</p>`;
-});
-}
-loadOrders();
-</script>
+<a class="whatsapp" href="https://wa.me/918383897693" target="_blank">🟢</a>
 
 </body>
 </html>
