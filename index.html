@@ -10,7 +10,7 @@
 body{margin:0;font-family:Arial;background:#fff7f2}
 header{background:var(--main);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer}
-.logo{height:38px;background:#fff;padding:4px;border-radius:6px}
+.logo{height:36px;background:#fff;padding:4px;border-radius:6px}
 header a{color:#fff;margin-left:14px;font-weight:bold;cursor:pointer;text-decoration:none}
 section{padding:20px}
 .hidden{display:none}
@@ -18,23 +18,20 @@ section{padding:20px}
 .card{background:#fff;border-radius:8px;box-shadow:0 3px 8px #0002;padding:12px;text-align:center}
 .card img{width:100%;height:160px;object-fit:cover;border-radius:6px}
 button{background:var(--accent);color:#fff;border:none;padding:9px;border-radius:6px;width:100%;cursor:pointer}
-button.gray{background:#7f8c8d}
-button.danger{background:#c0392b}
-input,select{width:100%;padding:8px;margin:6px 0;border-radius:5px;border:1px solid #ccc}
+input{width:100%;padding:8px;margin:6px 0;border-radius:5px;border:1px solid #ccc}
 .cart-item{display:flex;justify-content:space-between;margin:8px 0}
-.admin{background:#fff;padding:15px;border-radius:8px;margin-bottom:20px}
-.admin-product{border-bottom:1px solid #eee;padding:10px 0}
-.small-btns button{width:48%}
+.whatsapp{position:fixed;bottom:20px;right:20px;width:48px;height:48px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center}
+.whatsapp svg{width:22px;height:22px}
 </style>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc }
+import { getFirestore, collection, addDoc, getDocs }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* FIREBASE CONFIG */
+/* FIREBASE */
 const firebaseConfig = {
  apiKey: "AIzaSyA871BbtKAIFdOEIbzCZG7GWAtStNSy8IA",
  authDomain: "the-aachar-port.firebaseapp.com",
@@ -48,122 +45,96 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* ADMIN EMAILS */
-const ADMIN_EMAILS = ["satishbhattrai54@gmail.com"];
-
 /* GLOBAL */
-let cart=[], currentUser=null;
+let user=null;
+let cart=[];
 
-/* NAVIGATION */
+/* NAV */
 window.show=id=>{
- if(id==="admin" && (!currentUser || !ADMIN_EMAILS.includes(currentUser.email))){
-  alert("Admin only"); return;
- }
  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
  document.getElementById(id).classList.remove("hidden");
 };
 
-/* LOGIN */
-window.login = async () => {
+/* AUTH */
+window.signup=async()=>{
  try{
-  const email = userEmail.value.trim();
-  const pass = userPassword.value;
-
-  if(!email || !pass){
-   loginMsg.innerText="Enter email & password"; return;
-  }
-
-  await signInWithEmailAndPassword(auth,email,pass);
-  loginMsg.innerText="";
- }catch(e){
-  loginMsg.innerText=e.message;
- }
+  await createUserWithEmailAndPassword(auth, sEmail.value, sPassword.value);
+  alert("Signup successful");
+ }catch(e){ alert(e.message); }
 };
 
-/* LOGOUT */
-window.logout = async () => {
+window.login=async()=>{
+ try{
+  await signInWithEmailAndPassword(auth, lEmail.value, lPassword.value);
+ }catch(e){ alert(e.message); }
+};
+
+window.logout=async()=>{
  await signOut(auth);
- alert("Logged out");
- show("home");
 };
 
 /* AUTH STATE */
-onAuthStateChanged(auth,user=>{
- currentUser=user;
-
- if(user){
-  logoutBtn.style.display="inline";
-  loginLink.style.display="none";
-
-  if(ADMIN_EMAILS.includes(user.email)){
-   adminLink.style.display="inline";
-  }
- }else{
-  logoutBtn.style.display="none";
-  adminLink.style.display="none";
-  loginLink.style.display="inline";
- }
+onAuthStateChanged(auth,u=>{
+ user=u;
+ loginLink.style.display=u?"none":"inline";
+ logoutBtn.style.display=u?"inline":"none";
+ show("home");
 });
 
 /* LOAD PRODUCTS */
 async function loadProducts(){
- productList.innerHTML="";
- adminProducts.innerHTML="";
+ products.innerHTML="";
  const snap=await getDocs(collection(db,"products"));
  snap.forEach(d=>{
   const p=d.data();
-
-  productList.innerHTML+=`
-   <div class="card">
-    <img src="${p.image}">
-    <h3>${p.name}</h3>
-    <p>₹${p.price}</p>
-    <button>Add to Cart</button>
-   </div>
-  `;
-
-  if(currentUser && ADMIN_EMAILS.includes(currentUser.email)){
-   adminProducts.innerHTML+=`
-    <div class="admin-product">
-     <input id="n${d.id}" value="${p.name}">
-     <input id="pr${d.id}" type="number" value="${p.price}">
-     <input id="i${d.id}" value="${p.image}">
-     <div class="small-btns">
-      <button class="gray" onclick="updateProduct('${d.id}')">Update</button>
-      <button class="danger" onclick="deleteProduct('${d.id}')">Delete</button>
-     </div>
-    </div>
-   `;
-  }
+  products.innerHTML+=`
+  <div class="card">
+   <img src="${p.image}">
+   <h3>${p.name}</h3>
+   <p>₹${p.price}</p>
+   <button onclick="addCart('${p.name}',${p.price})">Add</button>
+  </div>`;
  });
 }
 loadProducts();
 
-/* PRODUCT CRUD */
-window.addProduct=async()=>{
- await addDoc(collection(db,"products"),{
-  name:pName.value,
-  price:+pPrice.value,
-  image:pImage.value
- });
- pName.value=pPrice.value=pImage.value="";
- loadProducts();
+/* CART */
+window.addCart=(name,price)=>{
+ const i=cart.find(x=>x.name===name);
+ i?i.qty++:cart.push({name,price,qty:1});
+ renderCart();
 };
 
-window.updateProduct=async(id)=>{
- await updateDoc(doc(db,"products",id),{
-  name:document.getElementById("n"+id).value,
-  price:+document.getElementById("pr"+id).value,
-  image:document.getElementById("i"+id).value
+function renderCart(){
+ cartItems.innerHTML="";
+ let t=0;
+ cart.forEach(c=>{
+  t+=c.price*c.qty;
+  cartItems.innerHTML+=`
+  <div class="cart-item">${c.name} x ${c.qty}<b>₹${c.price*c.qty}</b></div>`;
  });
- loadProducts();
-};
+ total.innerText=t;
+}
 
-window.deleteProduct=async(id)=>{
- if(confirm("Delete product?")){
-  await deleteDoc(doc(db,"products",id));
-  loadProducts();
- }
+/* CHECKOUT */
+window.checkout=async()=>{
+ if(!user) return alert("Login required");
+
+ let text="Order from The Aachar Port:%0A";
+ cart.forEach(c=>{
+  text+=`${c.name} x ${c.qty} = ₹${c.price*c.qty}%0A`;
+ });
+ text+=`Total ₹${total.innerText}`;
+
+ await addDoc(collection(db,"orders"),{
+  user:user.email,
+  cart,
+  total:+total.innerText,
+  created:new Date()
+ });
+
+ window.open(`https://wa.me/918383897693?text=${text}`);
+ cart=[]; renderCart();
 };
 </script>
 </head>
@@ -175,44 +146,40 @@ window.deleteProduct=async(id)=>{
 <img class="logo" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4hb9BQ32bcBMFLPT_Jpjl3jkY3QOXWtDO9N8rT6Y3wCvDzfa2RW56j5tsIQ14BUrSmyMK-HC8TAPoPUuxnnPwsCe7pQD_2lo8YDP4XyXZ3duWdNLhb9ea-TfP64pvcAw6UC-W9RT9FlaH5CVAeqge8RCB7lSIs5Iyvhx3y1msvaJRHa6iiwaGKuqkmc3n/s1024/IMG_2018.png">
 <b>The Aachar Port</b>
 </div>
-
 <div>
 <a onclick="show('home')">Home</a>
 <a id="loginLink" onclick="show('login')">Login</a>
-<a id="adminLink" onclick="show('admin')" style="display:none">Admin</a>
 <a id="logoutBtn" onclick="logout()" style="display:none">Logout</a>
 </div>
 </header>
 
 <section id="home">
-<h2>Our Products</h2>
-<div class="products" id="productList"></div>
+<h2>Products</h2>
+<div class="products" id="products"></div>
 </section>
 
 <section id="login" class="hidden">
-<h2>Login</h2>
-<input id="userEmail" placeholder="Email">
-<input id="userPassword" type="password" placeholder="Password">
+<h3>Login</h3>
+<input id="lEmail" placeholder="Email">
+<input id="lPassword" type="password" placeholder="Password">
 <button onclick="login()">Login</button>
-<p id="loginMsg" style="color:red"></p>
+
+<h3>Create Account</h3>
+<input id="sEmail" placeholder="Email">
+<input id="sPassword" type="password" placeholder="Password">
+<button onclick="signup()">Signup</button>
 </section>
 
-<section id="admin" class="hidden">
-<h2>Admin Panel</h2>
-
-<div class="admin">
-<h3>Add Product</h3>
-<input id="pName" placeholder="Name">
-<input id="pPrice" type="number" placeholder="Price">
-<input id="pImage" placeholder="Image URL">
-<button onclick="addProduct()">Add Product</button>
-</div>
-
-<div class="admin">
-<h3>Edit Products</h3>
-<div id="adminProducts"></div>
-</div>
+<section id="cart">
+<h2>Cart</h2>
+<div id="cartItems"></div>
+<h3>Total ₹<span id="total">0</span></h3>
+<button onclick="checkout()">Checkout via WhatsApp</button>
 </section>
+
+<a class="whatsapp" onclick="show('cart')">
+<svg viewBox="0 0 48 48"><path fill="#fff" d="M4.9 43.3l2.7-9.8A18.9 18.9 0 015 24C5 13.5 13.5 5 24 5s19 8.5 19 19-8.5 19-19 19c-3.2 0-6.3-.8-9.1-2.3L4.9 43.3z"/></svg>
+</a>
 
 </body>
 </html>
