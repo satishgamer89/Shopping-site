@@ -18,23 +18,23 @@ section{padding:20px}
 .card{background:#fff;border-radius:8px;box-shadow:0 3px 8px #0002;padding:12px;text-align:center}
 .card img{width:100%;height:160px;object-fit:cover;border-radius:6px}
 button{background:var(--accent);color:#fff;border:none;padding:9px;border-radius:6px;width:100%;cursor:pointer}
-button.danger{background:#c0392b}
 button.gray{background:#7f8c8d}
+button.danger{background:#c0392b}
 input,select{width:100%;padding:8px;margin:6px 0;border-radius:5px;border:1px solid #ccc}
 .cart-item{display:flex;justify-content:space-between;margin:8px 0}
 .admin{background:#fff;padding:15px;border-radius:8px;margin-bottom:20px}
 .admin-product{border-bottom:1px solid #eee;padding:10px 0}
-.small-btns button{width:48%;margin-top:6px}
+.small-btns button{width:48%}
 </style>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
+import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* FIREBASE */
+/* FIREBASE CONFIG */
 const firebaseConfig = {
  apiKey: "AIzaSyA871BbtKAIFdOEIbzCZG7GWAtStNSy8IA",
  authDomain: "the-aachar-port.firebaseapp.com",
@@ -52,9 +52,9 @@ const db = getFirestore(app);
 const ADMIN_EMAILS = ["satishbhattrai54@gmail.com"];
 
 /* GLOBAL */
-let cart=[], discount=0, currentUser=null;
+let cart=[], currentUser=null;
 
-/* NAV */
+/* NAVIGATION */
 window.show=id=>{
  if(id==="admin" && (!currentUser || !ADMIN_EMAILS.includes(currentUser.email))){
   alert("Admin only"); return;
@@ -63,42 +63,77 @@ window.show=id=>{
  document.getElementById(id).classList.remove("hidden");
 };
 
-/* AUTH */
-window.login=async()=>{
- await signInWithEmailAndPassword(auth,userEmail.value,"123456");
- show("cart");
+/* LOGIN */
+window.login = async () => {
+ try{
+  const email = userEmail.value.trim();
+  const pass = userPassword.value;
+
+  if(!email || !pass){
+   loginMsg.innerText="Enter email & password"; return;
+  }
+
+  await signInWithEmailAndPassword(auth,email,pass);
+  loginMsg.innerText="";
+ }catch(e){
+  loginMsg.innerText=e.message;
+ }
 };
 
+/* LOGOUT */
+window.logout = async () => {
+ await signOut(auth);
+ alert("Logged out");
+ show("home");
+};
+
+/* AUTH STATE */
 onAuthStateChanged(auth,user=>{
  currentUser=user;
- adminLink.style.display=user && ADMIN_EMAILS.includes(user.email)?"inline":"none";
+
+ if(user){
+  logoutBtn.style.display="inline";
+  loginLink.style.display="none";
+
+  if(ADMIN_EMAILS.includes(user.email)){
+   adminLink.style.display="inline";
+  }
+ }else{
+  logoutBtn.style.display="none";
+  adminLink.style.display="none";
+  loginLink.style.display="inline";
+ }
 });
 
 /* LOAD PRODUCTS */
 async function loadProducts(){
- productList.innerHTML=""; adminProducts.innerHTML="";
+ productList.innerHTML="";
+ adminProducts.innerHTML="";
  const snap=await getDocs(collection(db,"products"));
  snap.forEach(d=>{
   const p=d.data();
+
   productList.innerHTML+=`
-  <div class="card">
-   <img src="${p.image}">
-   <h3>${p.name}</h3>
-   <p>₹${p.price}</p>
-   <button onclick="addCart(${p.price})">Add to Cart</button>
-  </div>`;
+   <div class="card">
+    <img src="${p.image}">
+    <h3>${p.name}</h3>
+    <p>₹${p.price}</p>
+    <button>Add to Cart</button>
+   </div>
+  `;
 
   if(currentUser && ADMIN_EMAILS.includes(currentUser.email)){
    adminProducts.innerHTML+=`
-   <div class="admin-product">
-    <input id="n${d.id}" value="${p.name}">
-    <input id="pr${d.id}" type="number" value="${p.price}">
-    <input id="i${d.id}" value="${p.image}">
-    <div class="small-btns">
+    <div class="admin-product">
+     <input id="n${d.id}" value="${p.name}">
+     <input id="pr${d.id}" type="number" value="${p.price}">
+     <input id="i${d.id}" value="${p.image}">
+     <div class="small-btns">
       <button class="gray" onclick="updateProduct('${d.id}')">Update</button>
       <button class="danger" onclick="deleteProduct('${d.id}')">Delete</button>
+     </div>
     </div>
-   </div>`;
+   `;
   }
  });
 }
@@ -107,9 +142,10 @@ loadProducts();
 /* PRODUCT CRUD */
 window.addProduct=async()=>{
  await addDoc(collection(db,"products"),{
-  name:pName.value,price:+pPrice.value,image:pImage.value
+  name:pName.value,
+  price:+pPrice.value,
+  image:pImage.value
  });
- alert("Product Added");
  pName.value=pPrice.value=pImage.value="";
  loadProducts();
 };
@@ -120,31 +156,15 @@ window.updateProduct=async(id)=>{
   price:+document.getElementById("pr"+id).value,
   image:document.getElementById("i"+id).value
  });
- alert("Updated");
  loadProducts();
 };
 
 window.deleteProduct=async(id)=>{
- if(confirm("Delete this product?")){
+ if(confirm("Delete product?")){
   await deleteDoc(doc(db,"products",id));
   loadProducts();
  }
 };
-
-/* CART */
-window.addCart=price=>{
- const i=cart.find(x=>x.price===price);
- i?i.qty++:cart.push({price,qty:1});
- renderCart();
-};
-function renderCart(){
- cartItems.innerHTML=""; let t=0;
- cart.forEach(c=>{
-  t+=c.price*c.qty;
-  cartItems.innerHTML+=`<div class="cart-item">Item x ${c.qty}<b>₹${c.price*c.qty}</b></div>`;
- });
- total.innerText=t-discount; cartCount.innerText=cart.length;
-}
 </script>
 </head>
 
@@ -155,11 +175,12 @@ function renderCart(){
 <img class="logo" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4hb9BQ32bcBMFLPT_Jpjl3jkY3QOXWtDO9N8rT6Y3wCvDzfa2RW56j5tsIQ14BUrSmyMK-HC8TAPoPUuxnnPwsCe7pQD_2lo8YDP4XyXZ3duWdNLhb9ea-TfP64pvcAw6UC-W9RT9FlaH5CVAeqge8RCB7lSIs5Iyvhx3y1msvaJRHa6iiwaGKuqkmc3n/s1024/IMG_2018.png">
 <b>The Aachar Port</b>
 </div>
+
 <div>
 <a onclick="show('home')">Home</a>
-<a onclick="show('cart')">Cart (<span id="cartCount">0</span>)</a>
-<a onclick="show('login')">Login</a>
+<a id="loginLink" onclick="show('login')">Login</a>
 <a id="adminLink" onclick="show('admin')" style="display:none">Admin</a>
+<a id="logoutBtn" onclick="logout()" style="display:none">Logout</a>
 </div>
 </header>
 
@@ -168,16 +189,12 @@ function renderCart(){
 <div class="products" id="productList"></div>
 </section>
 
-<section id="cart" class="hidden">
-<h2>Your Cart</h2>
-<div id="cartItems"></div>
-<h3>Total ₹<span id="total">0</span></h3>
-</section>
-
 <section id="login" class="hidden">
 <h2>Login</h2>
 <input id="userEmail" placeholder="Email">
+<input id="userPassword" type="password" placeholder="Password">
 <button onclick="login()">Login</button>
+<p id="loginMsg" style="color:red"></p>
 </section>
 
 <section id="admin" class="hidden">
@@ -192,7 +209,7 @@ function renderCart(){
 </div>
 
 <div class="admin">
-<h3>Edit / Delete Products</h3>
+<h3>Edit Products</h3>
 <div id="adminProducts"></div>
 </div>
 </section>
