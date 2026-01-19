@@ -10,7 +10,7 @@
 body{margin:0;font-family:Arial;background:#fff7f2}
 header{background:var(--main);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer}
-.logo{height:36px;background:#fff;padding:4px;border-radius:6px}
+.logo{height:34px;background:#fff;padding:4px;border-radius:6px}
 header a{color:#fff;margin-left:14px;font-weight:bold;cursor:pointer;text-decoration:none}
 section{padding:20px}
 .hidden{display:none}
@@ -20,6 +20,7 @@ section{padding:20px}
 button{background:var(--accent);color:#fff;border:none;padding:9px;border-radius:6px;width:100%;cursor:pointer}
 input{width:100%;padding:8px;margin:6px 0;border-radius:5px;border:1px solid #ccc}
 .cart-item{display:flex;justify-content:space-between;margin:8px 0}
+.admin-box{background:#fff;padding:15px;border-radius:8px;margin-bottom:20px}
 .whatsapp{position:fixed;bottom:20px;right:20px;width:48px;height:48px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center}
 .whatsapp svg{width:22px;height:22px}
 </style>
@@ -45,7 +46,10 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* GLOBAL */
+/* ADMIN */
+const ADMIN_EMAIL = "satishbhattrai54@gmail.com";
+
+/* STATE */
 let user=null;
 let cart=[];
 
@@ -56,52 +60,57 @@ window.show=id=>{
 };
 
 /* AUTH */
-window.signup=async()=>{
- try{
-  await createUserWithEmailAndPassword(auth, sEmail.value, sPassword.value);
-  alert("Signup successful");
- }catch(e){ alert(e.message); }
-};
+window.signup=()=>createUserWithEmailAndPassword(auth,sEmail.value,sPass.value)
+.catch(e=>alert(e.message));
 
-window.login=async()=>{
- try{
-  await signInWithEmailAndPassword(auth, lEmail.value, lPassword.value);
- }catch(e){ alert(e.message); }
-};
+window.login=()=>signInWithEmailAndPassword(auth,lEmail.value,lPass.value)
+.catch(e=>alert(e.message));
 
-window.logout=async()=>{
- await signOut(auth);
-};
+window.logout=()=>signOut(auth);
 
 /* AUTH STATE */
 onAuthStateChanged(auth,u=>{
  user=u;
  loginLink.style.display=u?"none":"inline";
  logoutBtn.style.display=u?"inline":"none";
+ adminLink.style.display=(u && u.email===ADMIN_EMAIL)?"inline":"none";
  show("home");
 });
 
-/* LOAD PRODUCTS */
+/* PRODUCTS */
 async function loadProducts(){
  products.innerHTML="";
  const snap=await getDocs(collection(db,"products"));
  snap.forEach(d=>{
   const p=d.data();
   products.innerHTML+=`
-  <div class="card">
-   <img src="${p.image}">
-   <h3>${p.name}</h3>
-   <p>₹${p.price}</p>
-   <button onclick="addCart('${p.name}',${p.price})">Add</button>
-  </div>`;
+   <div class="card">
+    <img src="${p.image}">
+    <h3>${p.name}</h3>
+    <p>₹${p.price}</p>
+    <button onclick="addCart('${p.name}',${p.price})">Add to Cart</button>
+   </div>`;
  });
 }
 loadProducts();
 
+/* ADMIN ADD PRODUCT */
+window.addProduct=async()=>{
+ if(!user || user.email!==ADMIN_EMAIL) return alert("Admin only");
+ await addDoc(collection(db,"products"),{
+  name:pName.value,
+  price:+pPrice.value,
+  image:pImage.value
+ });
+ alert("Product Added");
+ pName.value=pPrice.value=pImage.value="";
+ loadProducts();
+};
+
 /* CART */
-window.addCart=(name,price)=>{
- const i=cart.find(x=>x.name===name);
- i?i.qty++:cart.push({name,price,qty:1});
+window.addCart=(n,p)=>{
+ const i=cart.find(x=>x.name===n);
+ i?i.qty++:cart.push({name:n,price:p,qty:1});
  renderCart();
 };
 
@@ -111,29 +120,23 @@ function renderCart(){
  cart.forEach(c=>{
   t+=c.price*c.qty;
   cartItems.innerHTML+=`
-  <div class="cart-item">${c.name} x ${c.qty}<b>₹${c.price*c.qty}</b></div>`;
+   <div class="cart-item">${c.name} x ${c.qty}<b>₹${c.price*c.qty}</b></div>`;
  });
  total.innerText=t;
 }
 
 /* CHECKOUT */
 window.checkout=async()=>{
- if(!user) return alert("Login required");
-
- let text="Order from The Aachar Port:%0A";
- cart.forEach(c=>{
-  text+=`${c.name} x ${c.qty} = ₹${c.price*c.qty}%0A`;
- });
- text+=`Total ₹${total.innerText}`;
+ if(!user) return alert("Login first");
+ let msg="Order from The Aachar Port:%0A";
+ cart.forEach(c=>msg+=`${c.name} x ${c.qty} = ₹${c.price*c.qty}%0A`);
+ msg+=`Total ₹${total.innerText}`;
 
  await addDoc(collection(db,"orders"),{
-  user:user.email,
-  cart,
-  total:+total.innerText,
-  created:new Date()
+  user:user.email, cart, total:+total.innerText, date:new Date()
  });
 
- window.open(`https://wa.me/918383897693?text=${text}`);
+ window.open(`https://wa.me/918383897693?text=${msg}`);
  cart=[]; renderCart();
 };
 </script>
@@ -148,7 +151,9 @@ window.checkout=async()=>{
 </div>
 <div>
 <a onclick="show('home')">Home</a>
+<a onclick="show('cart')">Cart</a>
 <a id="loginLink" onclick="show('login')">Login</a>
+<a id="adminLink" onclick="show('admin')" style="display:none">Admin</a>
 <a id="logoutBtn" onclick="logout()" style="display:none">Logout</a>
 </div>
 </header>
@@ -158,23 +163,33 @@ window.checkout=async()=>{
 <div class="products" id="products"></div>
 </section>
 
+<section id="cart" class="hidden">
+<h2>Your Cart</h2>
+<div id="cartItems"></div>
+<h3>Total ₹<span id="total">0</span></h3>
+<button onclick="checkout()">WhatsApp Checkout</button>
+</section>
+
 <section id="login" class="hidden">
 <h3>Login</h3>
 <input id="lEmail" placeholder="Email">
-<input id="lPassword" type="password" placeholder="Password">
+<input id="lPass" type="password" placeholder="Password">
 <button onclick="login()">Login</button>
 
-<h3>Create Account</h3>
+<h3>Signup</h3>
 <input id="sEmail" placeholder="Email">
-<input id="sPassword" type="password" placeholder="Password">
+<input id="sPass" type="password" placeholder="Password">
 <button onclick="signup()">Signup</button>
 </section>
 
-<section id="cart">
-<h2>Cart</h2>
-<div id="cartItems"></div>
-<h3>Total ₹<span id="total">0</span></h3>
-<button onclick="checkout()">Checkout via WhatsApp</button>
+<section id="admin" class="hidden">
+<h2>Admin Panel</h2>
+<div class="admin-box">
+<input id="pName" placeholder="Product Name">
+<input id="pPrice" type="number" placeholder="Price">
+<input id="pImage" placeholder="Image URL">
+<button onclick="addProduct()">Add Product</button>
+</div>
 </section>
 
 <a class="whatsapp" onclick="show('cart')">
