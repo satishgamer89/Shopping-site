@@ -8,169 +8,143 @@
 <style>
 :root{--main:#7b1e1e;--accent:#d35400}
 body{margin:0;font-family:Arial;background:#fff7f2}
-header{position:sticky;top:0;z-index:10;background:var(--main);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
+header{background:var(--main);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
 .brand{display:flex;align-items:center;gap:10px;cursor:pointer}
-.logo{height:40px;background:#fff;padding:4px;border-radius:6px}
-header a{color:#fff;margin-left:15px;font-weight:bold;cursor:pointer;text-decoration:none}
-section{padding:25px}
-.whatsapp svg{
-  width:24px;
-  height:24px;
-}
-.whatsapp{
-  position:fixed;
-  bottom:20px;
-  right:20px;
-  background:#25D366;
-  width:48px;
-  height:48px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  border-radius:50%;
-  text-decoration:none;
-}
+.logo{height:38px;background:#fff;padding:4px;border-radius:6px}
+header a{color:#fff;margin-left:14px;font-weight:bold;cursor:pointer;text-decoration:none}
+section{padding:20px}
 .hidden{display:none}
-.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
-.card{background:#fff;border-radius:10px;box-shadow:0 4px 10px #0002;padding:15px;text-align:center}
-.card img{width:100%;height:180px;object-fit:cover;border-radius:8px}
-button{background:var(--accent);color:#fff;border:none;padding:10px;border-radius:6px;width:100%;cursor:pointer}
-input,select{width:100%;padding:10px;margin:8px 0;border-radius:6px;border:1px solid #ccc}
-.cart-item{display:flex;justify-content:space-between;margin:10px 0}
+.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
+.card{background:#fff;border-radius:8px;box-shadow:0 3px 8px #0002;padding:12px;text-align:center}
+.card img{width:100%;height:160px;object-fit:cover;border-radius:6px}
+button{background:var(--accent);color:#fff;border:none;padding:9px;border-radius:6px;width:100%;cursor:pointer}
+button.danger{background:#c0392b}
+button.gray{background:#7f8c8d}
+input,select{width:100%;padding:8px;margin:6px 0;border-radius:5px;border:1px solid #ccc}
+.cart-item{display:flex;justify-content:space-between;margin:8px 0}
 .admin{background:#fff;padding:15px;border-radius:8px;margin-bottom:20px}
-.whatsapp{position:fixed;bottom:20px;right:20px;background:#25D366;color:white;padding:15px;border-radius:50%;font-size:22px;text-decoration:none}
+.admin-product{border-bottom:1px solid #eee;padding:10px 0}
+.small-btns button{width:48%;margin-top:6px}
 </style>
 
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } 
+import { getAuth, signInWithEmailAndPassword, onAuthStateChanged }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs } 
+import { getFirestore, collection, addDoc, getDocs, doc, deleteDoc, updateDoc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* 🔥 YOUR FIREBASE CONFIG */
+/* FIREBASE */
 const firebaseConfig = {
  apiKey: "AIzaSyA871BbtKAIFdOEIbzCZG7GWAtStNSy8IA",
  authDomain: "the-aachar-port.firebaseapp.com",
  projectId: "the-aachar-port",
  storageBucket: "the-aachar-port.firebasestorage.app",
  messagingSenderId: "118992341724",
- appId: "1:118992341724:web:4de7c1fdf5b30f822f0219",
- measurementId: "G-V5NT7SLS4P"
+ appId: "1:118992341724:web:4de7c1fdf5b30f822f0219"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-/* ---------- GLOBAL ---------- */
-let cart=[];
-let coupons=[];
-let discount=0;
-let currentUser=null;
+/* ADMIN EMAILS */
+const ADMIN_EMAILS = ["admin@theaacharport.com"];
 
-/* ---------- UI ---------- */
+/* GLOBAL */
+let cart=[], discount=0, currentUser=null;
+
+/* NAV */
 window.show=id=>{
+ if(id==="admin" && (!currentUser || !ADMIN_EMAILS.includes(currentUser.email))){
+  alert("Admin only"); return;
+ }
  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
  document.getElementById(id).classList.remove("hidden");
 };
 
-/* ---------- AUTH ---------- */
+/* AUTH */
 window.login=async()=>{
- const email=document.getElementById("userEmail").value;
- await signInWithEmailAndPassword(auth,email,"123456");
- alert("Login success");
+ await signInWithEmailAndPassword(auth,userEmail.value,"123456");
  show("cart");
 };
 
-onAuthStateChanged(auth,u=>currentUser=u);
-
-/* ---------- LOAD PRODUCTS ---------- */
-const productList=document.getElementById("productList");
-const psnap=await getDocs(collection(db,"products"));
-psnap.forEach(d=>{
- const p=d.data();
- productList.innerHTML+=`
- <div class="card">
- <img src="${p.image}">
- <h3>${p.name}</h3>
- <p>₹${p.price}</p>
- <button onclick="addCart('${d.id}',${p.price})">Add to Cart</button>
- </div>`;
+onAuthStateChanged(auth,user=>{
+ currentUser=user;
+ adminLink.style.display=user && ADMIN_EMAILS.includes(user.email)?"inline":"none";
 });
 
-/* ---------- CART ---------- */
-window.addCart=(id,price)=>{
- const i=cart.find(x=>x.id===id);
- i?i.qty++:cart.push({id,price,qty:1});
- renderCart();
+/* LOAD PRODUCTS */
+async function loadProducts(){
+ productList.innerHTML=""; adminProducts.innerHTML="";
+ const snap=await getDocs(collection(db,"products"));
+ snap.forEach(d=>{
+  const p=d.data();
+  productList.innerHTML+=`
+  <div class="card">
+   <img src="${p.image}">
+   <h3>${p.name}</h3>
+   <p>₹${p.price}</p>
+   <button onclick="addCart(${p.price})">Add to Cart</button>
+  </div>`;
+
+  if(currentUser && ADMIN_EMAILS.includes(currentUser.email)){
+   adminProducts.innerHTML+=`
+   <div class="admin-product">
+    <input id="n${d.id}" value="${p.name}">
+    <input id="pr${d.id}" type="number" value="${p.price}">
+    <input id="i${d.id}" value="${p.image}">
+    <div class="small-btns">
+      <button class="gray" onclick="updateProduct('${d.id}')">Update</button>
+      <button class="danger" onclick="deleteProduct('${d.id}')">Delete</button>
+    </div>
+   </div>`;
+  }
+ });
+}
+loadProducts();
+
+/* PRODUCT CRUD */
+window.addProduct=async()=>{
+ await addDoc(collection(db,"products"),{
+  name:pName.value,price:+pPrice.value,image:pImage.value
+ });
+ alert("Product Added");
+ pName.value=pPrice.value=pImage.value="";
+ loadProducts();
 };
 
+window.updateProduct=async(id)=>{
+ await updateDoc(doc(db,"products",id),{
+  name:document.getElementById("n"+id).value,
+  price:+document.getElementById("pr"+id).value,
+  image:document.getElementById("i"+id).value
+ });
+ alert("Updated");
+ loadProducts();
+};
+
+window.deleteProduct=async(id)=>{
+ if(confirm("Delete this product?")){
+  await deleteDoc(doc(db,"products",id));
+  loadProducts();
+ }
+};
+
+/* CART */
+window.addCart=price=>{
+ const i=cart.find(x=>x.price===price);
+ i?i.qty++:cart.push({price,qty:1});
+ renderCart();
+};
 function renderCart(){
- let t=0;cartItems.innerHTML="";
+ cartItems.innerHTML=""; let t=0;
  cart.forEach(c=>{
   t+=c.price*c.qty;
-  cartItems.innerHTML+=`
-  <div class="cart-item">Item x ${c.qty}<b>₹${c.price*c.qty}</b></div>`;
+  cartItems.innerHTML+=`<div class="cart-item">Item x ${c.qty}<b>₹${c.price*c.qty}</b></div>`;
  });
- total.innerText=t-discount;
- cartCount.innerText=cart.length;
+ total.innerText=t-discount; cartCount.innerText=cart.length;
 }
-window.totalCalc=()=>cart.reduce((s,c)=>s+c.price*c.qty,0);
-
-/* ---------- COUPONS ---------- */
-const csnap=await getDocs(collection(db,"coupons"));
-csnap.forEach(d=>coupons.push(d.data()));
-
-window.applyCoupon=()=>{
- const c=coupons.find(x=>x.code===couponCode.value.toUpperCase());
- if(!c) return alert("Invalid coupon");
- discount=c.type==="percent"?totalCalc()*c.value/100:c.value;
- discountText.innerText="Discount ₹"+discount;
- renderCart();
-};
-
-/* ---------- CHECKOUT ---------- */
-window.checkout=async()=>{
- if(!currentUser) return alert("Login first");
-
- const order={
-  user:currentUser.email,
-  cart,
-  total:totalCalc()-discount,
-  created:new Date()
- };
-
- await addDoc(collection(db,"orders"),order);
-
- window.open(`https://wa.me/918383897693?text=Order confirmed! Total ₹${order.total}`);
- alert("Order placed successfully");
-
- cart=[];discount=0;renderCart();loadOrders();
-};
-
-/* ---------- ADMIN ---------- */
-const ordersDiv=document.getElementById("ordersDiv");
-async function loadOrders(){
- ordersDiv.innerHTML="";
- const osnap=await getDocs(collection(db,"orders"));
- osnap.forEach(d=>{
-  const o=d.data();
-  ordersDiv.innerHTML+=`
-  <p>${o.user} | ₹${o.total}</p>`;
- });
-}
-loadOrders();
-
-window.addCoupon=async()=>{
- await addDoc(collection(db,"coupons"),{
-  code:cCode.value.toUpperCase(),
-  type:cType.value,
-  value:+cVal.value
- });
- alert("Coupon added");
-};
 </script>
 </head>
 
@@ -185,12 +159,12 @@ window.addCoupon=async()=>{
 <a onclick="show('home')">Home</a>
 <a onclick="show('cart')">Cart (<span id="cartCount">0</span>)</a>
 <a onclick="show('login')">Login</a>
-<a onclick="show('admin')">Admin</a>
+<a id="adminLink" onclick="show('admin')" style="display:none">Admin</a>
 </div>
 </header>
 
 <section id="home">
-<h2>Our Handmade Aachars</h2>
+<h2>Our Products</h2>
 <div class="products" id="productList"></div>
 </section>
 
@@ -198,38 +172,30 @@ window.addCoupon=async()=>{
 <h2>Your Cart</h2>
 <div id="cartItems"></div>
 <h3>Total ₹<span id="total">0</span></h3>
-<input id="couponCode" placeholder="Coupon Code">
-<button onclick="applyCoupon()">Apply Coupon</button>
-<p id="discountText"></p>
-<button onclick="checkout()">Place Order</button>
 </section>
 
 <section id="login" class="hidden">
-<h2>Customer Login</h2>
+<h2>Login</h2>
 <input id="userEmail" placeholder="Email">
 <button onclick="login()">Login</button>
 </section>
 
 <section id="admin" class="hidden">
 <h2>Admin Panel</h2>
+
 <div class="admin">
-<h3>Add Coupon</h3>
-<input id="cCode" placeholder="Code">
-<select id="cType">
-<option value="percent">Percent</option>
-<option value="flat">Flat</option>
-</select>
-<input id="cVal" placeholder="Value">
-<button onclick="addCoupon()">Add Coupon</button>
+<h3>Add Product</h3>
+<input id="pName" placeholder="Name">
+<input id="pPrice" type="number" placeholder="Price">
+<input id="pImage" placeholder="Image URL">
+<button onclick="addProduct()">Add Product</button>
 </div>
+
 <div class="admin">
-<h3>Orders</h3>
-<div id="ordersDiv"></div>
+<h3>Edit / Delete Products</h3>
+<div id="adminProducts"></div>
 </div>
 </section>
 
-<a class="whatsapp" href="https://wa.me/918383897693" target="_blank"><svg xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" width="100" height="100" viewBox="0 0 48 48">
-<path fill="#fff" d="M4.868,43.303l2.694-9.835C5.9,30.59,5.026,27.324,5.027,23.979C5.032,13.514,13.548,5,24.014,5c5.079,0.002,9.845,1.979,13.43,5.566c3.584,3.588,5.558,8.356,5.556,13.428c-0.004,10.465-8.522,18.98-18.986,18.98c-0.001,0,0,0,0,0h-0.008c-3.177-0.001-6.3-0.798-9.073-2.311L4.868,43.303z"></path><path fill="#fff" d="M4.868,43.803c-0.132,0-0.26-0.052-0.355-0.148c-0.125-0.127-0.174-0.312-0.127-0.483l2.639-9.636c-1.636-2.906-2.499-6.206-2.497-9.556C4.532,13.238,13.273,4.5,24.014,4.5c5.21,0.002,10.105,2.031,13.784,5.713c3.679,3.683,5.704,8.577,5.702,13.781c-0.004,10.741-8.746,19.48-19.486,19.48c-3.189-0.001-6.344-0.788-9.144-2.277l-9.875,2.589C4.953,43.798,4.911,43.803,4.868,43.803z"></path><path fill="#cfd8dc" d="M24.014,5c5.079,0.002,9.845,1.979,13.43,5.566c3.584,3.588,5.558,8.356,5.556,13.428c-0.004,10.465-8.522,18.98-18.986,18.98h-0.008c-3.177-0.001-6.3-0.798-9.073-2.311L4.868,43.303l2.694-9.835C5.9,30.59,5.026,27.324,5.027,23.979C5.032,13.514,13.548,5,24.014,5 M24.014,42.974C24.014,42.974,24.014,42.974,24.014,42.974C24.014,42.974,24.014,42.974,24.014,42.974 M24.014,42.974C24.014,42.974,24.014,42.974,24.014,42.974C24.014,42.974,24.014,42.974,24.014,42.974 M24.014,4C24.014,4,24.014,4,24.014,4C12.998,4,4.032,12.962,4.027,23.979c-0.001,3.367,0.849,6.685,2.461,9.622l-2.585,9.439c-0.094,0.345,0.002,0.713,0.254,0.967c0.19,0.192,0.447,0.297,0.711,0.297c0.085,0,0.17-0.011,0.254-0.033l9.687-2.54c2.828,1.468,5.998,2.243,9.197,2.244c11.024,0,19.99-8.963,19.995-19.98c0.002-5.339-2.075-10.359-5.848-14.135C34.378,6.083,29.357,4.002,24.014,4L24.014,4z"></path><path fill="#40c351" d="M35.176,12.832c-2.98-2.982-6.941-4.625-11.157-4.626c-8.704,0-15.783,7.076-15.787,15.774c-0.001,2.981,0.833,5.883,2.413,8.396l0.376,0.597l-1.595,5.821l5.973-1.566l0.577,0.342c2.422,1.438,5.2,2.198,8.032,2.199h0.006c8.698,0,15.777-7.077,15.78-15.776C39.795,19.778,38.156,15.814,35.176,12.832z"></path><path fill="#fff" fill-rule="evenodd" d="M19.268,16.045c-0.355-0.79-0.729-0.806-1.068-0.82c-0.277-0.012-0.593-0.011-0.909-0.011c-0.316,0-0.83,0.119-1.265,0.594c-0.435,0.475-1.661,1.622-1.661,3.956c0,2.334,1.7,4.59,1.937,4.906c0.237,0.316,3.282,5.259,8.104,7.161c4.007,1.58,4.823,1.266,5.693,1.187c0.87-0.079,2.807-1.147,3.202-2.255c0.395-1.108,0.395-2.057,0.277-2.255c-0.119-0.198-0.435-0.316-0.909-0.554s-2.807-1.385-3.242-1.543c-0.435-0.158-0.751-0.237-1.068,0.238c-0.316,0.474-1.225,1.543-1.502,1.859c-0.277,0.317-0.554,0.357-1.028,0.119c-0.474-0.238-2.002-0.738-3.815-2.354c-1.41-1.257-2.362-2.81-2.639-3.285c-0.277-0.474-0.03-0.731,0.208-0.968c0.213-0.213,0.474-0.554,0.712-0.831c0.237-0.277,0.316-0.475,0.474-0.791c0.158-0.317,0.079-0.594-0.04-0.831C20.612,19.329,19.69,16.983,19.268,16.045z" clip-rule="evenodd"></path>
-</svg></a>
 </body>
 </html>
