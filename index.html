@@ -27,11 +27,9 @@ section{padding:20px}
 .prev{left:10px}.next{right:10px}
 
 .qty{display:flex;gap:10px;align-items:center;margin:12px 0}
-
 .cart-item{display:flex;justify-content:space-between;margin:8px 0}
 
 .admin-box{background:#fff;padding:15px;border-radius:8px;margin-bottom:20px}
-
 input,textarea,button{width:100%;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #ccc}
 button{background:var(--accent);color:#fff;border:none;cursor:pointer}
 button.small{width:auto;padding:6px 12px}
@@ -126,14 +124,14 @@ const firebaseConfig = {
 
 const CLOUDINARY_CLOUD_NAME = "dmnsblldh";
 const CLOUDINARY_UPLOAD_PRESET = "aachar_upload";
+const ADMIN_EMAIL = "satishbhattrai54@gmail.com";
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-const ADMIN_EMAIL = "satishbhattrai54@gmail.com";
-
 let user=null,allProducts=[],currentProduct=null,slideIndex=0,qty=1,cart=[];
+const qtyEl=document.getElementById("qty");
 
 window.show=id=>{
  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
@@ -160,9 +158,10 @@ async function loadProducts(){
  snap.forEach(d=>{
   const p={id:d.id,...d.data()};
   allProducts.push(p);
+  const img = Array.isArray(p.images)&&p.images.length?p.images[0]:"https://via.placeholder.com/300x300?text=No+Image";
   products.innerHTML+=`
    <div class="card" onclick="openProduct('${p.id}')">
-    <img src="${p.images[0]}">
+    <img src="${img}">
     <h3>${p.name}</h3>
     <p>₹${p.price}</p>
    </div>`;
@@ -172,6 +171,9 @@ async function loadProducts(){
 window.openProduct=id=>{
  currentProduct=allProducts.find(p=>p.id===id);
  slideIndex=0;qty=1;qtyEl.innerText=qty;
+ currentProduct.images = Array.isArray(currentProduct.images)&&currentProduct.images.length
+  ? currentProduct.images
+  : ["https://via.placeholder.com/600x400?text=No+Image"];
  pvName.innerText=currentProduct.name;
  pvPrice.innerText=currentProduct.price;
  pvDesc.innerText=currentProduct.desc;
@@ -182,7 +184,6 @@ window.openProduct=id=>{
 
 window.nextSlide=()=>{slideIndex=(slideIndex+1)%currentProduct.images.length;pvImg.src=currentProduct.images[slideIndex];};
 window.prevSlide=()=>{slideIndex=(slideIndex-1+currentProduct.images.length)%currentProduct.images.length;pvImg.src=currentProduct.images[slideIndex];};
-const qtyEl=document.getElementById("qty");
 window.incQty=()=>qtyEl.innerText=++qty;
 window.decQty=()=>{if(qty>1)qtyEl.innerText=--qty};
 
@@ -190,35 +191,17 @@ window.addProduct=async()=>{
  if(!user||user.email!==ADMIN_EMAIL)return alert("Admin only");
  const files=[...pImages.files];
  if(!files.length)return alert("Upload images");
-
  const urls=[];
  for(const file of files){
   const fd=new FormData();
   fd.append("file",file);
   fd.append("upload_preset",CLOUDINARY_UPLOAD_PRESET);
-
-  const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,{
-   method:"POST",
-   body:fd
-  });
- const data = await res.json();
- console.log("Cloudinary:", data);
- if (!data.secure_url) {
- alert("Cloudinary upload failed");
- return;
-}
-urls.push(data.secure_url);
+  const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,{method:"POST",body:fd});
+  const data=await res.json();
+  if(!data.secure_url)return alert("Image upload failed");
+  urls.push(data.secure_url);
  }
-
- await addDoc(collection(db,"products"),{
-  name:pName.value,
-  price:+pPrice.value,
-  desc:pDesc.value,
-  ing:pIng.value,
-  images:urls,
-  created:new Date()
- });
-
+ await addDoc(collection(db,"products"),{name:pName.value,price:+pPrice.value,desc:pDesc.value,ing:pIng.value,images:urls,created:new Date()});
  alert("Product added");
  pName.value=pPrice.value=pDesc.value=pIng.value="";pImages.value="";
  loadProducts();
@@ -231,12 +214,8 @@ window.addToCart=()=>{
 };
 
 function renderCart(){
- cartItems.innerHTML="";
- let t=0;
- cart.forEach(c=>{
-  t+=c.price*c.qty;
-  cartItems.innerHTML+=`<div class="cart-item">${c.name} x ${c.qty}<b>₹${c.price*c.qty}</b></div>`;
- });
+ cartItems.innerHTML="";let t=0;
+ cart.forEach(c=>{t+=c.price*c.qty;cartItems.innerHTML+=`<div class="cart-item">${c.name} x ${c.qty}<b>₹${c.price*c.qty}</b></div>`;});
  total.innerText=t;
 }
 
