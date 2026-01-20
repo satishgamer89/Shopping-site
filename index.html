@@ -4,49 +4,29 @@
 <meta charset="UTF-8">
 <title>The Aachar Port</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <style>
 :root{--main:#7b1e1e;--accent:#d35400;--bg:#fff7f2}
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial;background:var(--bg)}
 header{background:var(--main);color:#fff;padding:12px 18px;display:flex;justify-content:space-between;align-items:center}
-.brand{display:flex;gap:10px;align-items:center;cursor:pointer}
-.logo{height:34px;background:#fff;padding:4px;border-radius:6px}
 header a{color:#fff;margin-left:14px;text-decoration:none;font-weight:bold;cursor:pointer}
 section{padding:20px}
 .hidden{display:none}
-
 .products{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
-.card{background:#fff;border-radius:8px;padding:12px;box-shadow:0 3px 8px #0002;cursor:pointer}
+.card{background:#fff;padding:12px;border-radius:8px;box-shadow:0 3px 8px #0002}
 .card img{width:100%;height:160px;object-fit:cover;border-radius:6px}
-
-.product-wrap{max-width:900px;margin:auto}
-.slider{position:relative}
-.slider img{width:100%;height:320px;object-fit:cover;border-radius:8px}
-.slide-btn{position:absolute;top:50%;transform:translateY(-50%);background:#0007;color:#fff;border:none;padding:8px;cursor:pointer}
-.prev{left:10px}.next{right:10px}
-
-.qty{display:flex;gap:10px;align-items:center;margin:12px 0}
-.cart-item{display:flex;justify-content:space-between;margin:8px 0}
-
-.admin-box{background:#fff;padding:15px;border-radius:8px;margin-bottom:20px}
-input,textarea,button{width:100%;padding:10px;margin:6px 0;border-radius:6px;border:1px solid #ccc}
-button{background:var(--accent);color:#fff;border:none;cursor:pointer}
-button.small{width:auto;padding:6px 12px}
+.admin-actions button{margin-top:6px}
+button{background:var(--accent);color:#fff;border:none;padding:8px;border-radius:6px;cursor:pointer}
 </style>
 </head>
 
 <body>
 
 <header>
- <div class="brand" onclick="show('home')">
-  <img class="logo" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4hb9BQ32bcBMFLPT_Jpjl3jkY3QOXWtDO9N8rT6Y3wCvDzfa2RW56j5tsIQ14BUrSmyMK-HC8TAPoPUuxnnPwsCe7pQD_2lo8YDP4XyXZ3duWdNLhb9ea-TfP64pvcAw6UC-W9RT9FlaH5CVAeqge8RCB7lSIs5Iyvhx3y1msvaJRHa6iiwaGKuqkmc3n/s1024/IMG_2018.png">
-  <b>The Aachar Port</b>
- </div>
+ <b>The Aachar Port</b>
  <div>
   <a onclick="show('home')">Home</a>
   <a onclick="show('cart')">Cart</a>
-  <a id="loginLink" onclick="show('login')">Login</a>
   <a id="adminLink" class="hidden" onclick="show('admin')">Admin</a>
   <a id="logoutBtn" class="hidden" onclick="logout()">Logout</a>
  </div>
@@ -57,176 +37,143 @@ button.small{width:auto;padding:6px 12px}
  <div class="products" id="products"></div>
 </section>
 
-<section id="product" class="hidden">
- <div class="product-wrap">
-  <div class="slider">
-   <button class="slide-btn prev" onclick="prevSlide()">❮</button>
-   <img id="pvImg">
-   <button class="slide-btn next" onclick="nextSlide()">❯</button>
-  </div>
-  <h2 id="pvName"></h2>
-  <h3>₹<span id="pvPrice"></span></h3>
-  <p id="pvDesc"></p>
-  <p><b>Ingredients:</b> <span id="pvIng"></span></p>
-  <div class="qty">
-   <button class="small" onclick="decQty()">−</button>
-   <b id="qty">1</b>
-   <button class="small" onclick="incQty()">+</button>
-  </div>
-  <button onclick="addToCart()">Add to Cart</button>
- </div>
-</section>
-
 <section id="cart" class="hidden">
- <h2>Your Cart</h2>
+ <h2>Cart</h2>
  <div id="cartItems"></div>
  <h3>Total ₹<span id="total">0</span></h3>
- <button onclick="checkout()">WhatsApp Checkout</button>
-</section>
-
-<section id="login" class="hidden">
- <h3>Login</h3>
- <input id="lEmail" placeholder="Email">
- <input id="lPass" type="password" placeholder="Password">
- <button onclick="login()">Login</button>
- <h3>Signup</h3>
- <input id="sEmail" placeholder="Email">
- <input id="sPass" type="password" placeholder="Password">
- <button onclick="signup()">Signup</button>
 </section>
 
 <section id="admin" class="hidden">
  <h2>Admin Panel</h2>
- <div class="admin-box">
-  <input id="pName" placeholder="Product Name">
-  <input id="pPrice" type="number" placeholder="Price">
-  <textarea id="pDesc" placeholder="Description"></textarea>
-  <textarea id="pIng" placeholder="Ingredients"></textarea>
-  <input id="pImages" type="file" multiple>
-  <button onclick="addProduct()">Add Product</button>
- </div>
+ <input id="pName" placeholder="Name">
+ <input id="pPrice" type="number" placeholder="Price">
+ <input id="pDesc" placeholder="Description">
+ <input id="pIng" placeholder="Ingredients">
+ <input id="pImages" type="file" multiple>
+ <button onclick="addProduct()">Add Product</button>
 </section>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
+import { getAuth, onAuthStateChanged, signOut }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs }
+import { getFirestore, collection, getDocs, addDoc, deleteDoc, doc, updateDoc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-const firebaseConfig = {
- apiKey: "AIzaSyA871BbtKAIFdOEIbzCZG7GWAtStNSy8IA",
- authDomain: "the-aachar-port.firebaseapp.com",
- projectId: "the-aachar-port",
- messagingSenderId: "118992341724",
- appId: "1:118992341724:web:4de7c1fdf5b30f822f0219"
+const firebaseConfig={
+ apiKey:"AIzaSyA871BbtKAIFdOEIbzCZG7GWAtStNSy8IA",
+ authDomain:"the-aachar-port.firebaseapp.com",
+ projectId:"the-aachar-port"
 };
 
-const CLOUDINARY_CLOUD_NAME = "dmnsblldh";
-const CLOUDINARY_UPLOAD_PRESET = "aachar_upload";
-const ADMIN_EMAIL = "satishbhattrai54@gmail.com";
+const CLOUDINARY="dmnsblldh";
+const UPLOAD_PRESET="aachar_upload";
+const ADMIN="satishbhattrai54@gmail.com";
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
 
-let user=null,allProducts=[],currentProduct=null,slideIndex=0,qty=1,cart=[];
-const qtyEl=document.getElementById("qty");
+let user=null,productsData=[],cart=[];
 
 window.show=id=>{
  document.querySelectorAll("section").forEach(s=>s.classList.add("hidden"));
  document.getElementById(id).classList.remove("hidden");
 };
 
-window.signup=()=>createUserWithEmailAndPassword(auth,sEmail.value,sPass.value);
-window.login=()=>signInWithEmailAndPassword(auth,lEmail.value,lPass.value);
-window.logout=()=>signOut(auth);
-
 onAuthStateChanged(auth,u=>{
  user=u;
- loginLink.classList.toggle("hidden",!!u);
+ adminLink.classList.toggle("hidden",!(u&&u.email===ADMIN));
  logoutBtn.classList.toggle("hidden",!u);
- adminLink.classList.toggle("hidden",!(u&&u.email===ADMIN_EMAIL));
  loadProducts();
- show("home");
 });
+
+window.logout=()=>signOut(auth);
 
 async function loadProducts(){
  products.innerHTML="";
  const snap=await getDocs(collection(db,"products"));
- allProducts=[];
+ productsData=[];
  snap.forEach(d=>{
   const p={id:d.id,...d.data()};
-  allProducts.push(p);
-  const img = Array.isArray(p.images)&&p.images.length?p.images[0]:"https://via.placeholder.com/300x300?text=No+Image";
+  p.images = Array.isArray(p.images)&&p.images.length?p.images:["https://via.placeholder.com/300"];
+  productsData.push(p);
+
   products.innerHTML+=`
-   <div class="card" onclick="openProduct('${p.id}')">
-    <img src="${img}">
+   <div class="card">
+    <img src="${p.images[0]}">
     <h3>${p.name}</h3>
     <p>₹${p.price}</p>
+    <button onclick="addToCart('${p.id}')">Add to Cart</button>
+    ${user&&user.email===ADMIN?`
+    <div class="admin-actions">
+     <button onclick="editProduct('${p.id}')">Edit</button>
+     <button onclick="deleteProduct('${p.id}')">Delete</button>
+    </div>`:""}
    </div>`;
  });
 }
 
-window.openProduct=id=>{
- currentProduct=allProducts.find(p=>p.id===id);
- slideIndex=0;qty=1;qtyEl.innerText=qty;
- currentProduct.images = Array.isArray(currentProduct.images)&&currentProduct.images.length
-  ? currentProduct.images
-  : ["https://via.placeholder.com/600x400?text=No+Image"];
- pvName.innerText=currentProduct.name;
- pvPrice.innerText=currentProduct.price;
- pvDesc.innerText=currentProduct.desc;
- pvIng.innerText=currentProduct.ing;
- pvImg.src=currentProduct.images[0];
- show("product");
-};
-
-window.nextSlide=()=>{slideIndex=(slideIndex+1)%currentProduct.images.length;pvImg.src=currentProduct.images[slideIndex];};
-window.prevSlide=()=>{slideIndex=(slideIndex-1+currentProduct.images.length)%currentProduct.images.length;pvImg.src=currentProduct.images[slideIndex];};
-window.incQty=()=>qtyEl.innerText=++qty;
-window.decQty=()=>{if(qty>1)qtyEl.innerText=--qty};
-
-window.addProduct=async()=>{
- if(!user||user.email!==ADMIN_EMAIL)return alert("Admin only");
- const files=[...pImages.files];
- if(!files.length)return alert("Upload images");
- const urls=[];
- for(const file of files){
-  const fd=new FormData();
-  fd.append("file",file);
-  fd.append("upload_preset",CLOUDINARY_UPLOAD_PRESET);
-  const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,{method:"POST",body:fd});
-  const data=await res.json();
-  if(!data.secure_url)return alert("Image upload failed");
-  urls.push(data.secure_url);
- }
- await addDoc(collection(db,"products"),{name:pName.value,price:+pPrice.value,desc:pDesc.value,ing:pIng.value,images:urls,created:new Date()});
- alert("Product added");
- pName.value=pPrice.value=pDesc.value=pIng.value="";pImages.value="";
- loadProducts();
-};
-
-window.addToCart=()=>{
- const i=cart.find(x=>x.id===currentProduct.id);
- i?i.qty+=qty:cart.push({id:currentProduct.id,name:currentProduct.name,price:currentProduct.price,qty});
+window.addToCart=id=>{
+ const p=productsData.find(x=>x.id===id);
+ if(!p)return alert("Product not found");
+ const item=cart.find(x=>x.id===id);
+ item?item.qty++:cart.push({id,name:p.name,price:p.price,qty:1});
  renderCart();
 };
 
 function renderCart(){
- cartItems.innerHTML="";let t=0;
- cart.forEach(c=>{t+=c.price*c.qty;cartItems.innerHTML+=`<div class="cart-item">${c.name} x ${c.qty}<b>₹${c.price*c.qty}</b></div>`;});
+ cartItems.innerHTML="";
+ let t=0;
+ cart.forEach(c=>{
+  t+=c.price*c.qty;
+  cartItems.innerHTML+=`${c.name} x ${c.qty} = ₹${c.price*c.qty}<br>`;
+ });
  total.innerText=t;
 }
 
-window.checkout=async()=>{
- if(!user||!cart.length)return alert("Login & cart required");
- await addDoc(collection(db,"orders"),{user:user.email,cart,total:+total.innerText,created:new Date()});
- let msg="Order from The Aachar Port:%0A";
- cart.forEach(c=>msg+=`${c.name} x ${c.qty} = ₹${c.price*c.qty}%0A`);
- msg+=`Total ₹${total.innerText}`;
- window.open(`https://wa.me/918383897693?text=${msg}`);
- cart=[];renderCart();
+window.deleteProduct=async id=>{
+ if(!confirm("Delete product?"))return;
+ await deleteDoc(doc(db,"products",id));
+ loadProducts();
+};
+
+window.editProduct=id=>{
+ const p=productsData.find(x=>x.id===id);
+ pName.value=p.name;
+ pPrice.value=p.price;
+ pDesc.value=p.desc;
+ pIng.value=p.ing;
+ window.editing=id;
+ show("admin");
+};
+
+window.addProduct=async()=>{
+ let imgs=[];
+ for(const f of pImages.files){
+  const fd=new FormData();
+  fd.append("file",f);
+  fd.append("upload_preset",UPLOAD_PRESET);
+  const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY}/image/upload`,{method:"POST",body:fd});
+  const d=await r.json();
+  imgs.push(d.secure_url);
+ }
+
+ if(window.editing){
+  await updateDoc(doc(db,"products",window.editing),{
+   name:pName.value,price:+pPrice.value,desc:pDesc.value,ing:pIng.value,images:imgs
+  });
+  window.editing=null;
+ }else{
+  await addDoc(collection(db,"products"),{
+   name:pName.value,price:+pPrice.value,desc:pDesc.value,ing:pIng.value,images:imgs
+  });
+ }
+
+ pName.value=pPrice.value=pDesc.value=pIng.value="";
+ pImages.value="";
+ show("home");
+ loadProducts();
 };
 </script>
 
