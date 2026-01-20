@@ -201,8 +201,13 @@ window.addProduct=async()=>{
    method:"POST",
    body:fd
   });
-  const data=await res.json();
-  urls.push(data.secure_url);
+ const data = await res.json();
+ console.log("Cloudinary:", data);
+ if (!data.secure_url) {
+ alert("Cloudinary upload failed");
+ return;
+}
+urls.push(data.secure_url);
  }
 
  await addDoc(collection(db,"products"),{
