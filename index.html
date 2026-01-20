@@ -6,24 +6,225 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
-:root{--main:#7b1e1e;--accent:#d35400}
-body{margin:0;font-family:Arial;background:#fff7f2}
-header{background:var(--main);color:#fff;padding:12px 20px;display:flex;justify-content:space-between;align-items:center}
-.brand{display:flex;align-items:center;gap:10px;cursor:pointer}
-.logo{height:34px;background:#fff;padding:4px;border-radius:6px}
-header a{color:#fff;margin-left:14px;font-weight:bold;cursor:pointer;text-decoration:none}
-section{padding:20px}
+:root{
+ --main:#7b1e1e;
+ --accent:#d35400;
+ --bg:#fff7f2
+}
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:Arial,Helvetica,sans-serif;
+ background:var(--bg)
+}
+header{
+ background:var(--main);
+ color:#fff;
+ padding:12px 18px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center
+}
+.brand{
+ display:flex;
+ gap:10px;
+ align-items:center;
+ cursor:pointer
+}
+.logo{
+ height:34px;
+ background:#fff;
+ padding:4px;
+ border-radius:6px
+}
+header a{
+ color:#fff;
+ margin-left:14px;
+ text-decoration:none;
+ font-weight:bold;
+ cursor:pointer
+}
+section{
+ padding:20px
+}
 .hidden{display:none}
-.products{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px}
-.card{background:#fff;border-radius:8px;box-shadow:0 3px 8px #0002;padding:12px;text-align:center}
-.card img{width:100%;height:160px;object-fit:cover;border-radius:6px}
-button{background:var(--accent);color:#fff;border:none;padding:9px;border-radius:6px;width:100%;cursor:pointer}
-input{width:100%;padding:8px;margin:6px 0;border-radius:5px;border:1px solid #ccc}
-.cart-item{display:flex;justify-content:space-between;margin:8px 0}
-.admin-box{background:#fff;padding:15px;border-radius:8px;margin-bottom:20px}
-.whatsapp{position:fixed;bottom:20px;right:20px;width:48px;height:48px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center}
-.whatsapp svg{width:22px;height:22px}
+
+/* PRODUCT GRID */
+.products{
+ display:grid;
+ grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+ gap:16px
+}
+.card{
+ background:#fff;
+ border-radius:8px;
+ padding:12px;
+ box-shadow:0 3px 8px #0002;
+ cursor:pointer
+}
+.card img{
+ width:100%;
+ height:160px;
+ object-fit:cover;
+ border-radius:6px
+}
+
+/* PRODUCT PAGE */
+.product-wrap{
+ max-width:900px;
+ margin:auto
+}
+.slider{
+ position:relative
+}
+.slider img{
+ width:100%;
+ height:320px;
+ object-fit:cover;
+ border-radius:8px
+}
+.slide-btn{
+ position:absolute;
+ top:50%;
+ transform:translateY(-50%);
+ background:#0007;
+ color:#fff;
+ border:none;
+ padding:8px;
+ cursor:pointer
+}
+.prev{left:10px}
+.next{right:10px}
+.qty{
+ display:flex;
+ gap:10px;
+ align-items:center;
+ margin:12px 0
+}
+
+/* CART */
+.cart-item{
+ display:flex;
+ justify-content:space-between;
+ margin:8px 0
+}
+
+/* ADMIN */
+.admin-box{
+ background:#fff;
+ padding:15px;
+ border-radius:8px;
+ margin-bottom:20px
+}
+
+/* FORM */
+input,textarea,button{
+ width:100%;
+ padding:10px;
+ margin:6px 0;
+ border-radius:6px;
+ border:1px solid #ccc
+}
+button{
+ background:var(--accent);
+ color:#fff;
+ border:none;
+ cursor:pointer
+}
+button.small{
+ width:auto;
+ padding:6px 12px
+}
 </style>
+</head>
+
+<body>
+
+<header>
+ <div class="brand" onclick="show('home')">
+  <img class="logo" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4hb9BQ32bcBMFLPT_Jpjl3jkY3QOXWtDO9N8rT6Y3wCvDzfa2RW56j5tsIQ14BUrSmyMK-HC8TAPoPUuxnnPwsCe7pQD_2lo8YDP4XyXZ3duWdNLhb9ea-TfP64pvcAw6UC-W9RT9FlaH5CVAeqge8RCB7lSIs5Iyvhx3y1msvaJRHa6iiwaGKuqkmc3n/s1024/IMG_2018.png">
+  <b>The Aachar Port</b>
+ </div>
+ <div>
+  <a onclick="show('home')">Home</a>
+  <a onclick="show('cart')">Cart</a>
+  <a id="loginLink" onclick="show('login')">Login</a>
+  <a id="adminLink" onclick="show('admin')" class="hidden">Admin</a>
+  <a id="logoutBtn" onclick="logout()" class="hidden">Logout</a>
+ </div>
+</header>
+
+<!-- HOME -->
+<section id="home">
+ <h2>Products</h2>
+ <div class="products" id="products"></div>
+</section>
+
+<!-- PRODUCT PAGE -->
+<section id="product" class="hidden">
+ <div class="product-wrap">
+  <div class="slider">
+   <button class="slide-btn prev" onclick="prevSlide()">❮</button>
+   <img id="pvImg">
+   <button class="slide-btn next" onclick="nextSlide()">❯</button>
+  </div>
+
+  <h2 id="pvName"></h2>
+  <h3>₹<span id="pvPrice"></span></h3>
+
+  <p id="pvDesc"></p>
+  <p><b>Ingredients:</b> <span id="pvIng"></span></p>
+
+  <div class="qty">
+   <button class="small" onclick="decQty()">−</button>
+   <b id="qty">1</b>
+   <button class="small" onclick="incQty()">+</button>
+  </div>
+
+  <button onclick="addToCart()">Add to Cart</button>
+ </div>
+</section>
+
+<!-- CART -->
+<section id="cart" class="hidden">
+ <h2>Your Cart</h2>
+ <div id="cartItems"></div>
+ <h3>Total ₹<span id="total">0</span></h3>
+ <button onclick="checkout()">WhatsApp Checkout</button>
+</section>
+
+<!-- LOGIN -->
+<section id="login" class="hidden">
+ <h3>Login</h3>
+ <input id="lEmail" placeholder="Email">
+ <input id="lPass" type="password" placeholder="Password">
+ <button onclick="login()">Login</button>
+
+ <h3>Signup</h3>
+ <input id="sEmail" placeholder="Email">
+ <input id="sPass" type="password" placeholder="Password">
+ <button onclick="signup()">Signup</button>
+</section>
+
+<!-- ADMIN -->
+<section id="admin" class="hidden">
+ <h2>Admin Panel</h2>
+
+ <div class="admin-box">
+  <h3>Add Product</h3>
+  <input id="pName" placeholder="Product Name">
+  <input id="pPrice" type="number" placeholder="Price">
+  <textarea id="pDesc" placeholder="Description"></textarea>
+  <textarea id="pIng" placeholder="Ingredients"></textarea>
+  <input id="pImages" type="file" multiple>
+  <button onclick="addProduct()">Add Product</button>
+ </div>
+
+ <div class="admin-box">
+  <h3>Orders</h3>
+  <div id="orders"></div>
+ </div>
+</section>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -31,13 +232,15 @@ import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, si
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 import { getFirestore, collection, addDoc, getDocs }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getStorage, ref, uploadBytes, getDownloadURL }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-/* FIREBASE */
+/* 🔥 FIREBASE CONFIG */
 const firebaseConfig = {
  apiKey: "AIzaSyA871BbtKAIFdOEIbzCZG7GWAtStNSy8IA",
  authDomain: "the-aachar-port.firebaseapp.com",
  projectId: "the-aachar-port",
- storageBucket: "the-aachar-port.firebasestorage.app",
+ storageBucket: "the-aachar-port.appspot.com",
  messagingSenderId: "118992341724",
  appId: "1:118992341724:web:4de7c1fdf5b30f822f0219"
 };
@@ -45,13 +248,17 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
-/* ADMIN */
+/* 🔐 ADMIN */
 const ADMIN_EMAIL = "satishbhattrai54@gmail.com";
 
 /* STATE */
 let user=null;
-let cart=[];
+let allProducts=[];
+let currentProduct=null;
+let slideIndex=0;
+let qty=1;
 
 /* NAV */
 window.show=id=>{
@@ -68,133 +275,214 @@ window.login=()=>signInWithEmailAndPassword(auth,lEmail.value,lPass.value)
 
 window.logout=()=>signOut(auth);
 
-/* AUTH STATE */
 onAuthStateChanged(auth,u=>{
  user=u;
- loginLink.style.display=u?"none":"inline";
- logoutBtn.style.display=u?"inline":"none";
- adminLink.style.display=(u && u.email===ADMIN_EMAIL)?"inline":"none";
+ loginLink.classList.toggle("hidden",!!u);
+ logoutBtn.classList.toggle("hidden",!u);
+ adminLink.classList.toggle("hidden",!(u && u.email===ADMIN_EMAIL));
  show("home");
 });
 
-/* PRODUCTS */
+/* 🛍️ LOAD PRODUCTS */
 async function loadProducts(){
- products.innerHTML="";
+ products.innerHTML="Loading...";
+ allProducts=[];
  const snap=await getDocs(collection(db,"products"));
+ products.innerHTML="";
  snap.forEach(d=>{
-  const p=d.data();
+  const p={id:d.id,...d.data()};
+  allProducts.push(p);
   products.innerHTML+=`
-   <div class="card">
-    <img src="${p.image}">
+   <div class="card" onclick="openProduct('${p.id}')">
+    <img src="${p.images[0]}">
     <h3>${p.name}</h3>
     <p>₹${p.price}</p>
-    <button onclick="addCart('${p.name}',${p.price})">Add to Cart</button>
    </div>`;
  });
 }
 loadProducts();
 
-/* ADMIN ADD PRODUCT */
+/* 📦 PRODUCT PAGE */
+window.openProduct=id=>{
+ currentProduct=allProducts.find(p=>p.id===id);
+ slideIndex=0;
+ qty=1;
+ qtyEl.innerText=qty;
+
+ pvName.innerText=currentProduct.name;
+ pvPrice.innerText=currentProduct.price;
+ pvDesc.innerText=currentProduct.desc;
+ pvIng.innerText=currentProduct.ing;
+
+ renderSlide();
+ show("product");
+};
+
+function renderSlide(){
+ pvImg.src=currentProduct.images[slideIndex];
+}
+
+window.nextSlide=()=>{
+ slideIndex=(slideIndex+1)%currentProduct.images.length;
+ renderSlide();
+};
+window.prevSlide=()=>{
+ slideIndex=(slideIndex-1+currentProduct.images.length)%currentProduct.images.length;
+ renderSlide();
+};
+
+/* 🔢 QTY */
+const qtyEl=document.getElementById("qty");
+window.incQty=()=>qtyEl.innerText=++qty;
+window.decQty=()=>{ if(qty>1) qtyEl.innerText=--qty };
+
+/* 🧑‍💼 ADMIN – ADD PRODUCT WITH IMAGE UPLOAD */
 window.addProduct=async()=>{
  if(!user || user.email!==ADMIN_EMAIL) return alert("Admin only");
+
+ const files=[...pImages.files];
+ if(!files.length) return alert("Upload images");
+
+ const urls=[];
+ for(const f of files){
+  const imgRef=ref(storage,`products/${Date.now()}_${f.name}`);
+  await uploadBytes(imgRef,f);
+  urls.push(await getDownloadURL(imgRef));
+ }
+
  await addDoc(collection(db,"products"),{
   name:pName.value,
   price:+pPrice.value,
-  image:pImage.value
+  desc:pDesc.value,
+  ing:pIng.value,
+  images:urls,
+  created:new Date()
  });
- alert("Product Added");
- pName.value=pPrice.value=pImage.value="";
+
+ alert("Product added");
+ pName.value=pPrice.value=pDesc.value=pIng.value="";
+ pImages.value="";
  loadProducts();
 };
+</script>
 
-/* CART */
-window.addCart=(n,p)=>{
- const i=cart.find(x=>x.name===n);
- i?i.qty++:cart.push({name:n,price:p,qty:1});
+<script type="module">
+import { collection, addDoc, getDocs, query, where, orderBy }
+from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* 🛒 CART STATE */
+let cart=[];
+
+/* ➕ ADD TO CART */
+window.addToCart=()=>{
+ const item=cart.find(i=>i.id===currentProduct.id);
+ if(item){
+  item.qty+=qty;
+ }else{
+  cart.push({
+   id:currentProduct.id,
+   name:currentProduct.name,
+   price:currentProduct.price,
+   qty:qty
+  });
+ }
+ alert("Added to cart");
  renderCart();
 };
 
+/* 🛒 RENDER CART */
 function renderCart(){
  cartItems.innerHTML="";
- let t=0;
+ let totalAmt=0;
+
  cart.forEach(c=>{
-  t+=c.price*c.qty;
+  const amt=c.price*c.qty;
+  totalAmt+=amt;
   cartItems.innerHTML+=`
-   <div class="cart-item">${c.name} x ${c.qty}<b>₹${c.price*c.qty}</b></div>`;
+   <div class="cart-item">
+    ${c.name} x ${c.qty}
+    <b>₹${amt}</b>
+   </div>`;
  });
- total.innerText=t;
+
+ total.innerText=totalAmt;
 }
 
-/* CHECKOUT */
+/* 📦 CHECKOUT */
 window.checkout=async()=>{
  if(!user) return alert("Login first");
+ if(!cart.length) return alert("Cart empty");
+
  let msg="Order from The Aachar Port:%0A";
- cart.forEach(c=>msg+=`${c.name} x ${c.qty} = ₹${c.price*c.qty}%0A`);
- msg+=`Total ₹${total.innerText}`;
+ cart.forEach(c=>{
+  msg+=`${c.name} x ${c.qty} = ₹${c.price*c.qty}%0A`;
+ });
+ msg+=`Total = ₹${total.innerText}`;
 
  await addDoc(collection(db,"orders"),{
-  user:user.email, cart, total:+total.innerText, date:new Date()
+  user:user.email,
+  cart:cart,
+  total:+total.innerText,
+  status:"New",
+  created:new Date()
  });
 
  window.open(`https://wa.me/918383897693?text=${msg}`);
- cart=[]; renderCart();
+ cart=[];
+ renderCart();
+};
+
+/* 🧾 LOAD USER ORDERS */
+async function loadUserOrders(){
+ if(!user) return;
+ orders.innerHTML="";
+
+ const q=query(
+  collection(db,"orders"),
+  where("user","==",user.email),
+  orderBy("created","desc")
+ );
+
+ const snap=await getDocs(q);
+ snap.forEach(d=>{
+  const o=d.data();
+  orders.innerHTML+=`
+   <div class="admin-box">
+    <b>Total: ₹${o.total}</b><br>
+    Status: ${o.status}<br>
+    Items: ${o.cart.map(i=>`${i.name} x ${i.qty}`).join(", ")}
+   </div>`;
+ });
+}
+
+/* 🧑‍💼 ADMIN – LOAD ALL ORDERS */
+async function loadAllOrders(){
+ if(!user || user.email!==ADMIN_EMAIL) return;
+ orders.innerHTML="";
+
+ const q=query(collection(db,"orders"),orderBy("created","desc"));
+ const snap=await getDocs(q);
+
+ snap.forEach(d=>{
+  const o=d.data();
+  orders.innerHTML+=`
+   <div class="admin-box">
+    <b>${o.user}</b><br>
+    Total: ₹${o.total}<br>
+    Status: ${o.status}<br>
+    Items:<br>
+    ${o.cart.map(i=>`• ${i.name} x ${i.qty}`).join("<br>")}
+   </div>`;
+ });
+}
+
+/* 🔁 LOAD ORDERS ON PAGE CHANGE */
+const _show=window.show;
+window.show=id=>{
+ _show(id);
+ if(id==="admin") loadAllOrders();
+ if(id==="orders") loadUserOrders();
 };
 </script>
-</head>
-
-<body>
-
-<header>
-<div class="brand" onclick="show('home')">
-<img class="logo" src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEi4hb9BQ32bcBMFLPT_Jpjl3jkY3QOXWtDO9N8rT6Y3wCvDzfa2RW56j5tsIQ14BUrSmyMK-HC8TAPoPUuxnnPwsCe7pQD_2lo8YDP4XyXZ3duWdNLhb9ea-TfP64pvcAw6UC-W9RT9FlaH5CVAeqge8RCB7lSIs5Iyvhx3y1msvaJRHa6iiwaGKuqkmc3n/s1024/IMG_2018.png">
-<b>The Aachar Port</b>
-</div>
-<div>
-<a onclick="show('home')">Home</a>
-<a onclick="show('cart')">Cart</a>
-<a id="loginLink" onclick="show('login')">Login</a>
-<a id="adminLink" onclick="show('admin')" style="display:none">Admin</a>
-<a id="logoutBtn" onclick="logout()" style="display:none">Logout</a>
-</div>
-</header>
-
-<section id="home">
-<h2>Products</h2>
-<div class="products" id="products"></div>
-</section>
-
-<section id="cart" class="hidden">
-<h2>Your Cart</h2>
-<div id="cartItems"></div>
-<h3>Total ₹<span id="total">0</span></h3>
-<button onclick="checkout()">WhatsApp Checkout</button>
-</section>
-
-<section id="login" class="hidden">
-<h3>Login</h3>
-<input id="lEmail" placeholder="Email">
-<input id="lPass" type="password" placeholder="Password">
-<button onclick="login()">Login</button>
-
-<h3>Signup</h3>
-<input id="sEmail" placeholder="Email">
-<input id="sPass" type="password" placeholder="Password">
-<button onclick="signup()">Signup</button>
-</section>
-
-<section id="admin" class="hidden">
-<h2>Admin Panel</h2>
-<div class="admin-box">
-<input id="pName" placeholder="Product Name">
-<input id="pPrice" type="number" placeholder="Price">
-<input id="pImage" placeholder="Image URL">
-<button onclick="addProduct()">Add Product</button>
-</div>
-</section>
-
-<a class="whatsapp" onclick="show('cart')">
-<svg viewBox="0 0 48 48"><path fill="#fff" d="M4.9 43.3l2.7-9.8A18.9 18.9 0 015 24C5 13.5 13.5 5 24 5s19 8.5 19 19-8.5 19-19 19c-3.2 0-6.3-.8-9.1-2.3L4.9 43.3z"/></svg>
-</a>
-
 </body>
 </html>
