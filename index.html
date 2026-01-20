@@ -89,11 +89,11 @@ button.small{width:auto;padding:6px 12px}
 <section id="login" class="hidden">
  <h3>Login</h3>
  <input id="lEmail" placeholder="Email">
- <input id="lPass" type="password">
+ <input id="lPass" type="password" placeholder="Password">
  <button onclick="login()">Login</button>
  <h3>Signup</h3>
  <input id="sEmail" placeholder="Email">
- <input id="sPass" type="password">
+ <input id="sPass" type="password" placeholder="Password">
  <button onclick="signup()">Signup</button>
 </section>
 
@@ -107,35 +107,31 @@ button.small{width:auto;padding:6px 12px}
   <input id="pImages" type="file" multiple>
   <button onclick="addProduct()">Add Product</button>
  </div>
- <div class="admin-box">
-  <h3>Orders</h3>
-  <div id="orders"></div>
- </div>
 </section>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, getDocs, query, where, orderBy }
+import { getFirestore, collection, addDoc, getDocs }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-import { getStorage, ref, uploadBytes, getDownloadURL }
-from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
 const firebaseConfig = {
  apiKey: "AIzaSyA871BbtKAIFdOEIbzCZG7GWAtStNSy8IA",
  authDomain: "the-aachar-port.firebaseapp.com",
  projectId: "the-aachar-port",
- storageBucket: "the-aachar-port.appspot.com",
  messagingSenderId: "118992341724",
  appId: "1:118992341724:web:4de7c1fdf5b30f822f0219"
 };
 
-const app=initializeApp(firebaseConfig);
-const auth=getAuth(app);
-const db=getFirestore(app);
-const storage=getStorage(app);
-const ADMIN_EMAIL="satishbhattrai54@gmail.com";
+const CLOUDINARY_CLOUD_NAME = "YOUR_CLOUD_NAME";
+const CLOUDINARY_UPLOAD_PRESET = "YOUR_UPLOAD_PRESET";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const ADMIN_EMAIL = "satishbhattrai54@gmail.com";
 
 let user=null,allProducts=[],currentProduct=null,slideIndex=0,qty=1,cart=[];
 
@@ -194,15 +190,30 @@ window.addProduct=async()=>{
  if(!user||user.email!==ADMIN_EMAIL)return alert("Admin only");
  const files=[...pImages.files];
  if(!files.length)return alert("Upload images");
+
  const urls=[];
- for(const f of files){
-  const r=ref(storage,`products/${Date.now()}_${f.name}`);
-  await uploadBytes(r,f);
-  urls.push(await getDownloadURL(r));
+ for(const file of files){
+  const fd=new FormData();
+  fd.append("file",file);
+  fd.append("upload_preset",CLOUDINARY_UPLOAD_PRESET);
+
+  const res=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`,{
+   method:"POST",
+   body:fd
+  });
+  const data=await res.json();
+  urls.push(data.secure_url);
  }
+
  await addDoc(collection(db,"products"),{
-  name:pName.value,price:+pPrice.value,desc:pDesc.value,ing:pIng.value,images:urls,created:new Date()
+  name:pName.value,
+  price:+pPrice.value,
+  desc:pDesc.value,
+  ing:pIng.value,
+  images:urls,
+  created:new Date()
  });
+
  alert("Product added");
  pName.value=pPrice.value=pDesc.value=pIng.value="";pImages.value="";
  loadProducts();
@@ -212,7 +223,6 @@ window.addToCart=()=>{
  const i=cart.find(x=>x.id===currentProduct.id);
  i?i.qty+=qty:cart.push({id:currentProduct.id,name:currentProduct.name,price:currentProduct.price,qty});
  renderCart();
- alert("Added to cart");
 };
 
 function renderCart(){
