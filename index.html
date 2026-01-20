@@ -27,6 +27,7 @@ button{background:var(--accent);color:#fff;border:none;padding:8px;border-radius
  <div>
   <a onclick="show('home')">Home</a>
   <a onclick="show('cart')">Cart</a>
+  <a id="loginLink" onclick="show('login')">Login</a>
   <a id="adminLink" class="hidden" onclick="show('admin')">Admin</a>
   <a id="logoutBtn" class="hidden" onclick="logout()">Logout</a>
  </div>
@@ -81,14 +82,29 @@ window.show=id=>{
  document.getElementById(id).classList.remove("hidden");
 };
 
-onAuthStateChanged(auth,u=>{
- user=u;
- adminLink.classList.toggle("hidden",!(u&&u.email===ADMIN));
- logoutBtn.classList.toggle("hidden",!u);
+onAuthStateChanged(auth, u => {
+ user = u;
+
+ // Login visible only when logged OUT
+ loginLink.classList.toggle("hidden", !!u);
+
+ // Logout visible only when logged IN
+ logoutBtn.classList.toggle("hidden", !u);
+
+ // Admin only for admin email
+ adminLink.classList.toggle(
+  "hidden",
+  !(u && u.email === ADMIN)
+ );
+
  loadProducts();
+ show("home");
 });
 
-window.logout=()=>signOut(auth);
+window.logout = async () => {
+ await signOut(auth);
+ show("home");
+};
 
 async function loadProducts(){
  products.innerHTML="";
