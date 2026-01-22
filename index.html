@@ -7,14 +7,11 @@
 
 <style>
 :root{
- --main:#111;
  --accent:#1faa00;
  --bg:#0f0f0f;
 }
 
-*{
- box-sizing:border-box;
-}
+*{box-sizing:border-box}
 
 body{
  margin:0;
@@ -26,204 +23,152 @@ body{
 /* HEADER */
 header{
  background:#111;
- color:#fff;
  padding:12px 16px;
  display:flex;
  justify-content:space-between;
  align-items:center;
  flex-wrap:wrap;
- gap:10px;
 }
 
-header b{
- font-size:18px;
-}
+header b{font-size:18px}
 
 header div{
  display:flex;
  gap:12px;
- flex-wrap:wrap;
 }
 
 header a{
  color:#fff;
  text-decoration:none;
  font-weight:bold;
- cursor:pointer;
  font-size:14px;
+ cursor:pointer;
 }
 
 /* SECTIONS */
-section{
- padding:16px;
-}
+section{padding:16px}
 
 /* PRODUCTS GRID */
 .products{
  display:grid;
- grid-template-columns:repeat(2,1fr);
- gap:14px;
+ grid-template-columns:repeat(3,1fr);
+ gap:12px;
 }
 
-/* PRODUCT CARD */
+/* CARD */
 .card{
- background:#1a1a1a;
- padding:12px;
- border-radius:14px;
+ background:#1c1c1c;
+ border-radius:18px;
+ padding:10px;
  position:relative;
  display:flex;
  flex-direction:column;
+ min-height:260px;
 }
 
+/* IMAGE */
 .card img{
  width:100%;
- height:140px;
+ height:120px;
  object-fit:contain;
  background:#fff;
- border-radius:10px;
- padding:6px;
+ border-radius:14px;
+ padding:8px;
  cursor:pointer;
 }
 
+/* TITLE */
 .card h3{
- font-size:14px;
- margin:8px 0 4px;
-}
-
-.card p{
  font-size:13px;
- opacity:.8;
+ font-weight:600;
+ margin:8px 0 4px;
+ line-height:1.3;
 }
 
 /* PRICE */
 .price{
- font-size:15px;
- font-weight:bold;
+ font-size:14px;
+ font-weight:700;
+ display:flex;
+ align-items:center;
+ gap:6px;
 }
 
 .old{
  font-size:12px;
- opacity:.5;
+ color:#777;
  text-decoration:line-through;
- margin-left:4px;
 }
 
 /* ADD BUTTON */
 .add-btn{
  position:absolute;
- right:10px;
- bottom:10px;
+ bottom:12px;
+ right:12px;
  background:#1faa00;
  color:#fff;
  border:none;
- padding:6px 14px;
- border-radius:8px;
+ padding:6px 16px;
+ border-radius:10px;
  font-size:13px;
+ font-weight:bold;
  cursor:pointer;
 }
 
-/* ADMIN / CART BUTTONS */
+/* QTY CONTROLS */
+.qty-box{
+ position:absolute;
+ bottom:12px;
+ right:12px;
+ background:#fff;
+ color:#000;
+ border-radius:10px;
+ display:flex;
+ align-items:center;
+ overflow:hidden;
+ height:32px;
+}
+
+.qty-box button{
+ width:32px;
+ height:32px;
+ border:none;
+ background:#f2f2f2;
+ font-size:18px;
+ cursor:pointer;
+}
+
+.qty-box span{
+ width:32px;
+ text-align:center;
+ font-weight:bold;
+}
+
+/* ADMIN BUTTONS */
 .admin-actions{
- margin-top:8px;
+ margin-top:auto;
  display:flex;
  gap:6px;
 }
 
 .admin-actions button{
+ font-size:11px;
  padding:6px;
- font-size:12px;
-}
-
-/* GLOBAL BUTTON */
-button{
- background:var(--accent);
- color:#fff;
- border:none;
- padding:10px;
- border-radius:8px;
- cursor:pointer;
- width:100%;
- font-size:14px;
-}
-
-/* INPUTS */
-input{
- width:100%;
- padding:10px;
- margin:6px 0;
- font-size:14px;
- border-radius:6px;
- border:none;
-}
-
-/* PRODUCT PAGE */
-#productPage img{
- width:100%;
- max-height:320px;
- object-fit:cover;
- border-radius:12px;
- margin:10px 0;
 }
 
 /* CART */
-#cartItems{
- font-size:14px;
- line-height:1.6;
-}
+#cartItems{line-height:1.6}
 
-/* ===== RESPONSIVE BREAKPOINTS ===== */
-
-/* SMALL PHONES */
-@media(max-width:360px){
- .products{
-  grid-template-columns:1fr;
- }
-}
-
-/* PHONES */
+/* RESPONSIVE */
 @media(max-width:480px){
- header{
-  flex-direction:column;
-  align-items:flex-start;
- }
-
- header div{
-  width:100%;
-  justify-content:space-between;
- }
-
- .products{
-  grid-template-columns:repeat(2,1fr);
- }
-
- .card img{
-  height:130px;
- }
+ .products{grid-template-columns:repeat(2,1fr)}
 }
 
-/* TABLETS */
-@media(min-width:481px) and (max-width:900px){
- .products{
-  grid-template-columns:repeat(3,1fr);
- }
-
- .card img{
-  height:150px;
- }
-}
-
-/* DESKTOP */
 @media(min-width:901px){
- .products{
-  grid-template-columns:repeat(4,1fr);
- }
-
- section{
-  padding:20px 40px;
- }
+ .products{grid-template-columns:repeat(4,1fr)}
+ section{padding:20px 40px}
 }
 </style>
-
 </head>
 
 <body>
@@ -276,7 +221,7 @@ input{
  <button onclick="addProduct()">Save Product</button>
 </section>
 
-<!-- PRODUCT DETAILS -->
+<!-- PRODUCT PAGE -->
 <section id="productPage" style="display:none">
  <button onclick="show('home')">← Back</button>
  <img id="pdImg">
@@ -284,7 +229,7 @@ input{
  <h3>₹<span id="pdPrice"></span></h3>
  <p id="pdDesc"></p>
  <p><b>Ingredients:</b> <span id="pdIng"></span></p>
- <button onclick="addToCart(currentProductId)">Add to Cart</button>
+ <button onclick="addQty(currentProductId)">Add to Cart</button>
 </section>
 
 <script type="module">
@@ -312,7 +257,7 @@ const db=getFirestore(app);
 let user=null,productsData=[],cart=[],editing=null;
 let currentProductId=null;
 
-/* SECTION SWITCH */
+/* NAV */
 window.show=id=>{
  document.querySelectorAll("section").forEach(s=>s.style.display="none");
  document.getElementById(id).style.display="block";
@@ -332,7 +277,7 @@ onAuthStateChanged(auth,u=>{
  show("home");
 });
 
-/* PRODUCTS */
+/* LOAD PRODUCTS */
 async function loadProducts(){
  products.innerHTML="";
  const snap=await getDocs(collection(db,"products"));
@@ -349,10 +294,12 @@ async function loadProducts(){
     <div class="price">
      ₹${p.price}<span class="old">₹${p.price+30}</span>
     </div>
-    <button class="add-btn"
-      onclick="event.stopPropagation();addToCart('${p.id}')">
+    <div id="btn-${p.id}">
+     <button class="add-btn"
+      onclick="event.stopPropagation();addQty('${p.id}')">
       ADD
-    </button>
+     </button>
+    </div>
     ${user&&user.email===ADMIN?`
      <div class="admin-actions">
       <button onclick="editProduct('${p.id}')">Edit</button>
@@ -365,13 +312,12 @@ async function loadProducts(){
 /* PRODUCT PAGE */
 window.openProduct=id=>{
  const p=productsData.find(x=>x.id===id);
- if(!p)return alert("Product not found");
  currentProductId=id;
- pdImg.src=p.images?.[0]||"https://via.placeholder.com/300";
+ pdImg.src=p.images?.[0];
  pdName.innerText=p.name;
  pdPrice.innerText=p.price;
- pdDesc.innerText=p.desc||"No description available";
- pdIng.innerText=p.ing||"N/A";
+ pdDesc.innerText=p.desc||"";
+ pdIng.innerText=p.ing||"";
  show("productPage");
 };
 
@@ -382,6 +328,35 @@ window.addToCart=id=>{
  i?i.qty++:cart.push({id,name:p.name,price:p.price,qty:1});
  renderCart();
 };
+
+window.addQty=id=>{
+ addToCart(id);
+ updateQtyUI(id);
+};
+
+window.removeQty=id=>{
+ const item=cart.find(x=>x.id===id);
+ if(!item)return;
+ item.qty--;
+ if(item.qty<=0){
+  cart=cart.filter(x=>x.id!==id);
+  document.getElementById(`btn-${id}`).innerHTML=`
+   <button class="add-btn"
+    onclick="event.stopPropagation();addQty('${id}')">ADD</button>`;
+ }else updateQtyUI(id);
+ renderCart();
+};
+
+function updateQtyUI(id){
+ const item=cart.find(x=>x.id===id);
+ if(!item)return;
+ document.getElementById(`btn-${id}`).innerHTML=`
+  <div class="qty-box">
+   <button onclick="event.stopPropagation();removeQty('${id}')">−</button>
+   <span>${item.qty}</span>
+   <button onclick="event.stopPropagation();addQty('${id}')">+</button>
+  </div>`;
+}
 
 function renderCart(){
  cartItems.innerHTML="";
@@ -417,7 +392,8 @@ window.addProduct=async()=>{
   const fd=new FormData();
   fd.append("file",f);
   fd.append("upload_preset",UPLOAD_PRESET);
-  const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY}/image/upload`,{method:"POST",body:fd});
+  const r=await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY}/image/upload`,
+   {method:"POST",body:fd});
   imgs.push((await r.json()).secure_url);
  }
 
