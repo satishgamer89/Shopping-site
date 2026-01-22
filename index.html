@@ -219,6 +219,73 @@ section{padding:16px}
  .products{grid-template-columns:repeat(4,1fr)}
  #productPage,.cart-bar{max-width:480px;margin:auto}
 }
+
+/* ===== Bottom Navigation Bar ===== */
+
+.bottom-nav{
+ position:fixed;
+ bottom:14px;
+ left:50%;
+ transform:translateX(-50%);
+ background:#1b1b1d;
+ border-radius:26px;
+ padding:10px 18px;
+ display:flex;
+ gap:26px;
+ box-shadow:0 10px 30px rgba(0,0,0,.6);
+ z-index:999;
+}
+
+.nav-item{
+ position:relative;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ justify-content:center;
+ color:#aaa;
+ font-size:12px;
+ cursor:pointer;
+ min-width:52px;
+}
+
+.nav-item .icon{
+ font-size:20px;
+ margin-bottom:4px;
+}
+
+.nav-item.active{
+ color:#f5c542;
+}
+
+.nav-item.active .icon{
+ background:#3a2f10;
+ padding:8px;
+ border-radius:14px;
+ color:#f5c542;
+}
+
+.nav-item .badge{
+ position:absolute;
+ top:-6px;
+ right:2px;
+ background:#ff3b3b;
+ color:#fff;
+ font-size:10px;
+ padding:2px 6px;
+ border-radius:10px;
+}
+
+/* Space for bottom nav */
+body{
+ padding-bottom:100px;
+}
+
+/* Desktop: hide bottom nav */
+@media(min-width:768px){
+ .bottom-nav{display:none}
+}
+
+ 
 </style>
 </head>
 
@@ -283,6 +350,31 @@ section{padding:16px}
  <div class="cart-bar" id="cartBar"></div>
 </section>
 
+<!-- Bottom Navigation -->
+<div class="bottom-nav">
+  <div class="nav-item active" onclick="show('home');setActive(this)">
+    <span class="icon">🏠</span>
+    <small>Home</small>
+  </div>
+
+  <div class="nav-item" onclick="alert('Categories coming soon');setActive(this)">
+    <span class="icon">◻◻</span>
+    <small>Categories</small>
+  </div>
+
+  <div class="nav-item" onclick="window.print();setActive(this)">
+    <span class="icon">🖨</span>
+    <small>Print</small>
+  </div>
+
+  <div class="nav-item" onclick="alert('Ambulance');setActive(this)">
+    <span class="icon">➕</span>
+    <small>Ambulance</small>
+    <span class="badge">New</span>
+  </div>
+</div>
+
+ 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth,onAuthStateChanged,signOut,
@@ -520,6 +612,13 @@ window.addProduct=async()=>{
  show("home");
  loadProducts();
 };
+
+window.setActive = el => {
+ document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+ el.classList.add('active');
+};
+
+ 
 </script>
 
 </body>
