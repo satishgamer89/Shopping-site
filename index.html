@@ -34,6 +34,21 @@ header a{
  cursor:pointer;
 }
 section{padding:16px}
+ section{
+ animation:iosSlide .35s cubic-bezier(.4,0,.2,1);
+}
+
+@keyframes iosSlide{
+ from{
+  transform:translateX(20px);
+  opacity:0;
+ }
+ to{
+  transform:translateX(0);
+  opacity:1;
+ }
+}
+
 .products{
  display:grid;
  grid-template-columns:repeat(2,1fr);
@@ -180,6 +195,35 @@ section{padding:16px}
  align-items:center;
  border-top:1px solid #222;
 }
+
+.cart-badge{
+ position:absolute;
+ top:2px;
+ right:10px;
+
+ min-width:18px;
+ height:18px;
+ padding:0 5px;
+
+ background:red;
+ color:#fff;
+ border-radius:9px;
+
+ font-size:11px;
+ font-weight:bold;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+
+ animation:bounce .35s ease;
+}
+
+@keyframes bounce{
+ 0%{transform:scale(0.6)}
+ 50%{transform:scale(1.2)}
+ 100%{transform:scale(1)}
+}
+ 
 .cart-qty{
  display:flex;
  align-items:center;
@@ -280,6 +324,12 @@ section{padding:16px}
  transform:scale(0.94);
 }
 
+.bottom-nav.hide{
+ transform:translateY(120%);
+ opacity:0;
+ transition:all .35s cubic-bezier(.4,0,.2,1);
+}
+ 
 /* Desktop safe */
 @media(min-width:768px){
  .bottom-nav{
@@ -482,6 +532,35 @@ function startAutoSlide(){
  },3000);
 }
 
+function renderCart(){
+ cartItems.innerHTML="";
+ let t=0,qty=0;
+
+ cart.forEach(c=>{
+  t+=c.price*c.qty;
+  qty+=c.qty;
+  cartItems.innerHTML+=`${c.name} × ${c.qty} = ₹${c.price*c.qty}<br>`;
+ });
+ total.innerText=t;
+
+ // badge update
+ const cartNav=document.querySelector('[data-nav="cart"]');
+ if(cartNav){
+  let badge=cartNav.querySelector(".cart-badge");
+  if(qty>0){
+   if(!badge){
+    badge=document.createElement("div");
+    badge.className="cart-badge";
+    cartNav.appendChild(badge);
+   }
+   badge.innerText=qty;
+  }else if(badge){
+   badge.remove();
+  }
+ }
+}
+
+ 
 // Swipe support
 pdImg.addEventListener("touchstart",e=>{touchXStart=e.touches[0].clientX;});
 pdImg.addEventListener("touchend",e=>{
@@ -623,6 +702,19 @@ window.setActive = el => {
   .forEach(i=>i.classList.remove('active'));
  el.classList.add('active');
 };
+
+let lastScrollY=0;
+window.addEventListener("scroll",()=>{
+ const nav=document.querySelector(".bottom-nav");
+ if(!nav) return;
+
+ if(window.scrollY>lastScrollY && window.scrollY>60){
+  nav.classList.add("hide");
+ }else{
+  nav.classList.remove("hide");
+ }
+ lastScrollY=window.scrollY;
+});
 
  
 </script>
