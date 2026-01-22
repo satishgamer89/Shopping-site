@@ -34,17 +34,20 @@ input{width:100%;padding:8px;margin:6px 0}
  </div>
 </header>
 
+<!-- HOME -->
 <section id="home">
  <h2>Products</h2>
  <div class="products" id="products"></div>
 </section>
 
+<!-- CART -->
 <section id="cart" style="display:none">
  <h2>Cart</h2>
  <div id="cartItems"></div>
  <h3>Total ₹<span id="total">0</span></h3>
 </section>
 
+<!-- LOGIN -->
 <section id="login" style="display:none">
  <h2>Login</h2>
  <input id="lEmail" placeholder="Email">
@@ -57,6 +60,7 @@ input{width:100%;padding:8px;margin:6px 0}
  <button onclick="signup()">Signup</button>
 </section>
 
+<!-- ADMIN -->
 <section id="admin" style="display:none">
  <h2>Admin Panel</h2>
  <input id="pName" placeholder="Name">
@@ -65,6 +69,22 @@ input{width:100%;padding:8px;margin:6px 0}
  <input id="pIng" placeholder="Ingredients">
  <input id="pImages" type="file" multiple>
  <button onclick="addProduct()">Save Product</button>
+</section>
+
+<!-- PRODUCT DETAILS PAGE -->
+<section id="productPage" style="display:none">
+ <button onclick="show('home')">← Back</button>
+
+ <img id="pdImg"
+      style="width:100%;max-height:320px;object-fit:cover;border-radius:8px;margin-top:10px">
+
+ <h2 id="pdName"></h2>
+ <h3>₹<span id="pdPrice"></span></h3>
+
+ <p id="pdDesc"></p>
+ <p><b>Ingredients:</b> <span id="pdIng"></span></p>
+
+ <button onclick="addToCart(currentProductId)">Add to Cart</button>
 </section>
 
 <script type="module">
@@ -90,8 +110,9 @@ const auth=getAuth(app);
 const db=getFirestore(app);
 
 let user=null,productsData=[],cart=[],editing=null;
+let currentProductId=null;
 
-/* SECTION SWITCH (FIXED) */
+/* SECTION SWITCH */
 window.show=id=>{
  document.querySelectorAll("section").forEach(s=>s.style.display="none");
  document.getElementById(id).style.display="block";
@@ -121,7 +142,9 @@ async function loadProducts(){
   productsData.push(p);
   products.innerHTML+=`
    <div class="card">
-    <img src="${p.images?.[0]||'https://via.placeholder.com/300'}">
+    <img src="${p.images?.[0]||'https://via.placeholder.com/300'}"
+         onclick="openProduct('${p.id}')"
+         style="cursor:pointer">
     <h3>${p.name}</h3>
     <p>₹${p.price}</p>
     <button onclick="addToCart('${p.id}')">Add to Cart</button>
@@ -134,7 +157,22 @@ async function loadProducts(){
  });
 }
 
-/* CART FIXED */
+/* PRODUCT PAGE */
+window.openProduct=id=>{
+ const p=productsData.find(x=>x.id===id);
+ if(!p)return alert("Product not found");
+
+ currentProductId=id;
+ pdImg.src=p.images?.[0]||"https://via.placeholder.com/300";
+ pdName.innerText=p.name;
+ pdPrice.innerText=p.price;
+ pdDesc.innerText=p.desc||"No description available";
+ pdIng.innerText=p.ing||"N/A";
+
+ show("productPage");
+};
+
+/* CART */
 window.addToCart=id=>{
  const p=productsData.find(x=>x.id===id);
  const i=cart.find(x=>x.id===id);
