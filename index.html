@@ -394,6 +394,23 @@ section{padding:16px}
 body.hide-bottom-nav .bottom-nav{
  display:none !important;
 }
+
+/* collapsible highlights */
+.highlight-toggle{
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ cursor:pointer;
+}
+
+#highlightArrow{
+ font-size:16px;
+ transition:.3s;
+}
+
+.highlights-collapsed{
+ display:none;
+}
  
 </style>
 </head>
@@ -452,9 +469,12 @@ body.hide-bottom-nav .bottom-nav{
   <p><b>Ingredients:</b> <span id="pdIng"></span></p>
  </div>
  <div class="product-card">
- <div class="product-section-title">Product highlights</div>
+ <div class="product-section-title highlight-toggle" onclick="toggleHighlights()">
+ Product highlights
+ <span id="highlightArrow">▲</span>
+</div>
 
- <div class="product-highlights">
+  <div class="product-highlights" id="productHighlightsBox">
   
   <div class="highlight-item">
    <div class="highlight-label">Brand</div>
@@ -617,6 +637,28 @@ window.openProduct=id=>{
  pdPrice.innerText=p.price;
  pdDesc.innerText=p.desc||"";
  pdIng.innerText=p.ing||"";
+ // ===== PRODUCT HIGHLIGHTS (SAFE AUTO) =====
+const map={
+ brand:["phBrand","Brand"],
+ model:["phModel","Model Name"],
+ type:["phType","Type"],
+ qty:["phQty","Quantity"],
+ shelfLife:["phLife","Maximum Shelf Life"],
+ container:["phContainer","Container Type"],
+ pack:["phPack","Pack of"],
+ food:["phFood","Food Preference"]
+};
+
+Object.keys(map).forEach(k=>{
+ const el=document.getElementById(map[k][0]);
+ if(p[k]){
+  el.textContent=p[k];
+  el.parentElement.style.display="block";
+ }else{
+  el.parentElement.style.display="none";
+ }
+});
+
  renderDots();
  updateProductQtyUI(id);
  startAutoSlide();
@@ -741,6 +783,17 @@ function renderCart(){
  });
  total.innerText=t;
 }
+
+
+ // toggle product highlights
+function toggleHighlights(){
+ const box=document.getElementById("productHighlightsBox");
+ const arrow=document.getElementById("highlightArrow");
+ box.classList.toggle("highlights-collapsed");
+ arrow.textContent = box.classList.contains("highlights-collapsed") ? "▼" : "▲";
+}
+
+
 
 // ADMIN
 window.deleteProduct=async id=>{
