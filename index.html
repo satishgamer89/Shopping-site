@@ -157,6 +157,33 @@ section{padding:16px}
  cursor:pointer;
 }
 
+/* ===== FIX + / - VISIBILITY IN DARK MODE ===== */
+
+.cart-qty{
+ background:#ffffff; /* keep pill visible */
+}
+
+.cart-qty button{
+ color:#000 !important;          /* force visible */
+ font-weight:700;
+ opacity:1;
+}
+
+.cart-qty span{
+ color:#000;
+}
+
+/* Dark mode override safety */
+[data-theme="dark"] .cart-qty{
+ background:#ffffff;
+}
+
+[data-theme="dark"] .cart-qty button,
+[data-theme="dark"] .cart-qty span{
+ color:#000 !important;
+}
+
+ 
 #productPage{
  padding:0;
  animation:slideUp .25s ease;
