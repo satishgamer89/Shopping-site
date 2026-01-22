@@ -338,6 +338,10 @@ section{padding:16px}
  }
 }
 
+/* Hide bottom nav on product page */
+body.hide-bottom-nav .bottom-nav{
+ display:none !important;
+}
  
 </style>
 </head>
@@ -453,10 +457,18 @@ const db=getFirestore(app);
 
 let user=null,productsData=[],cart=[],editing=null,currentImages=[],imgIndex=0,autoSlide,touchXStart=0;
 
-window.show=id=>{
+ window.show=id=>{
  document.querySelectorAll("section").forEach(s=>s.style.display="none");
  document.getElementById(id).style.display="block";
+
+ // hide bottom nav on product page only
+ if(id==="productPage"){
+  document.body.classList.add("hide-bottom-nav");
+ }else{
+  document.body.classList.remove("hide-bottom-nav");
+ }
 };
+
 
 window.login=()=>signInWithEmailAndPassword(auth,lEmail.value,lPass.value);
 window.signup=()=>createUserWithEmailAndPassword(auth,sEmail.value,sPass.value);
