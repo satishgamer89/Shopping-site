@@ -140,10 +140,62 @@ section{padding:16px}
  font-size:11px;
  cursor:pointer;
 }
+
+/* PRODUCT PAGE CLEAN UI */
 #productPage{
+ background:#f8f8f8;
+ padding-bottom:24px;
  padding:0;
  animation:slideUp .25s ease;
 }
+
+/* rounded product container */
+.product-card{
+ background:#fff;
+ border-radius:18px;
+ padding:16px;
+ margin:12px;
+ box-shadow:0 8px 24px rgba(0,0,0,.06);
+}
+
+/* section title */
+.product-section-title{
+ font-size:20px;
+ font-weight:600;
+ margin-bottom:12px;
+}
+
+/* PRODUCT HIGHLIGHTS */
+.product-highlights{
+ display:grid;
+ grid-template-columns:1fr 1fr;
+ gap:16px 20px;
+}
+
+.highlight-item{
+ padding-bottom:14px;
+ border-bottom:1px solid #eee;
+}
+
+.highlight-label{
+ font-size:13px;
+ color:#888;
+ margin-bottom:4px;
+}
+
+.highlight-value{
+ font-size:16px;
+ font-weight:500;
+ color:#222;
+}
+
+/* responsive */
+@media(max-width:600px){
+ .product-highlights{
+  grid-template-columns:1fr;
+ }
+}
+ 
 @keyframes slideUp{
  from{transform:translateY(40px);opacity:0}
  to{transform:translateY(0);opacity:1}
@@ -399,6 +451,54 @@ body.hide-bottom-nav .bottom-nav{
   <p id="pdDesc"></p>
   <p><b>Ingredients:</b> <span id="pdIng"></span></p>
  </div>
+ <div class="product-card">
+ <div class="product-section-title">Product highlights</div>
+
+ <div class="product-highlights">
+  
+  <div class="highlight-item">
+   <div class="highlight-label">Brand</div>
+   <div class="highlight-value" id="phBrand">Bikaneri</div>
+  </div>
+
+  <div class="highlight-item">
+   <div class="highlight-label">Model Name</div>
+   <div class="highlight-value" id="phModel">Basket Spongy Rasgulla</div>
+  </div>
+
+  <div class="highlight-item">
+   <div class="highlight-label">Type</div>
+   <div class="highlight-value" id="phType">Rasgulla</div>
+  </div>
+
+  <div class="highlight-item">
+   <div class="highlight-label">Quantity</div>
+   <div class="highlight-value" id="phQty">1000 g</div>
+  </div>
+
+  <div class="highlight-item">
+   <div class="highlight-label">Maximum Shelf Life</div>
+   <div class="highlight-value" id="phLife">182 Days</div>
+  </div>
+
+  <div class="highlight-item">
+   <div class="highlight-label">Container Type</div>
+   <div class="highlight-value" id="phContainer">Tin</div>
+  </div>
+
+  <div class="highlight-item">
+   <div class="highlight-label">Pack of</div>
+   <div class="highlight-value" id="phPack">1</div>
+  </div>
+
+  <div class="highlight-item">
+   <div class="highlight-label">Food Preference</div>
+   <div class="highlight-value" id="phFood">Vegetarian</div>
+  </div>
+
+ </div>
+</div>
+
  <div class="cart-bar" id="cartBar"></div>
 </section>
 
