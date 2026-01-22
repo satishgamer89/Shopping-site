@@ -11,29 +11,52 @@
  --accent:#1faa00;
  --bg:#0f0f0f;
 }
-*{box-sizing:border-box}
+
+*{
+ box-sizing:border-box;
+}
+
 body{
  margin:0;
- font-family:Arial;
+ font-family:Arial, Helvetica, sans-serif;
  background:var(--bg);
  color:#fff;
 }
+
+/* HEADER */
 header{
  background:#111;
  color:#fff;
- padding:12px 18px;
+ padding:12px 16px;
  display:flex;
  justify-content:space-between;
  align-items:center;
+ flex-wrap:wrap;
+ gap:10px;
 }
+
+header b{
+ font-size:18px;
+}
+
+header div{
+ display:flex;
+ gap:12px;
+ flex-wrap:wrap;
+}
+
 header a{
  color:#fff;
- margin-left:14px;
  text-decoration:none;
  font-weight:bold;
  cursor:pointer;
+ font-size:14px;
 }
-section{padding:16px}
+
+/* SECTIONS */
+section{
+ padding:16px;
+}
 
 /* PRODUCTS GRID */
 .products{
@@ -48,7 +71,10 @@ section{padding:16px}
  padding:12px;
  border-radius:14px;
  position:relative;
+ display:flex;
+ flex-direction:column;
 }
+
 .card img{
  width:100%;
  height:140px;
@@ -58,10 +84,12 @@ section{padding:16px}
  padding:6px;
  cursor:pointer;
 }
+
 .card h3{
  font-size:14px;
  margin:8px 0 4px;
 }
+
 .card p{
  font-size:13px;
  opacity:.8;
@@ -72,6 +100,7 @@ section{padding:16px}
  font-size:15px;
  font-weight:bold;
 }
+
 .old{
  font-size:12px;
  opacity:.5;
@@ -93,23 +122,38 @@ section{padding:16px}
  cursor:pointer;
 }
 
-/* CART / ADMIN */
-.admin-actions button{
- margin-top:6px;
+/* ADMIN / CART BUTTONS */
+.admin-actions{
+ margin-top:8px;
+ display:flex;
+ gap:6px;
 }
+
+.admin-actions button{
+ padding:6px;
+ font-size:12px;
+}
+
+/* GLOBAL BUTTON */
 button{
  background:var(--accent);
  color:#fff;
  border:none;
- padding:8px;
- border-radius:6px;
+ padding:10px;
+ border-radius:8px;
  cursor:pointer;
  width:100%;
+ font-size:14px;
 }
+
+/* INPUTS */
 input{
  width:100%;
- padding:8px;
+ padding:10px;
  margin:6px 0;
+ font-size:14px;
+ border-radius:6px;
+ border:none;
 }
 
 /* PRODUCT PAGE */
@@ -120,7 +164,66 @@ input{
  border-radius:12px;
  margin:10px 0;
 }
+
+/* CART */
+#cartItems{
+ font-size:14px;
+ line-height:1.6;
+}
+
+/* ===== RESPONSIVE BREAKPOINTS ===== */
+
+/* SMALL PHONES */
+@media(max-width:360px){
+ .products{
+  grid-template-columns:1fr;
+ }
+}
+
+/* PHONES */
+@media(max-width:480px){
+ header{
+  flex-direction:column;
+  align-items:flex-start;
+ }
+
+ header div{
+  width:100%;
+  justify-content:space-between;
+ }
+
+ .products{
+  grid-template-columns:repeat(2,1fr);
+ }
+
+ .card img{
+  height:130px;
+ }
+}
+
+/* TABLETS */
+@media(min-width:481px) and (max-width:900px){
+ .products{
+  grid-template-columns:repeat(3,1fr);
+ }
+
+ .card img{
+  height:150px;
+ }
+}
+
+/* DESKTOP */
+@media(min-width:901px){
+ .products{
+  grid-template-columns:repeat(4,1fr);
+ }
+
+ section{
+  padding:20px 40px;
+ }
+}
 </style>
+
 </head>
 
 <body>
