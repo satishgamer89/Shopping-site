@@ -491,24 +491,50 @@ window.editProduct=id=>{
  show("admin");
 };
 
-window.addProduct=async()=>{
- let imgs=[];
- for(const f of pImages.files){
-  const fd=new FormData();
-  fd.append("file",f);
-  fd.append("upload_preset",UPLOAD_PRESET);
-  const r=await fetch(
-   `https://api.cloudinary.com/v1_1/${CLOUDINARY}/image/upload`,
-   {method:"POST",body:fd}
-  );
-  imgs.push((await r.json()).secure_url);
+window.addProduct = async () => {
+ let imgs = [];
+
+ // upload only if images selected
+ if (pImages.files.length) {
+  for (const f of pImages.files) {
+   const fd = new FormData();
+   fd.append("file", f);
+   fd.append("upload_preset", UPLOAD_PRESET);
+   const r = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY}/image/upload`,
+    { method: "POST", body: fd }
+   );
+   imgs.push((await r.json()).secure_url);
+  }
  }
- editing
- ? await updateDoc(doc(db,"products",editing),
-   {name:pName.value,price:+pPrice.value,desc:pDesc.value,ing:pIng.value,images:imgs})
- : await addDoc(collection(db,"products"),
-   {name:pName.value,price:+pPrice.value,desc:pDesc.value,ing:pIng.value,images:imgs});
- editing=null;
+
+ if (editing) {
+  const old = productsData.find(p => p.id === editing);
+  await updateDoc(doc(db, "products", editing), {
+   name: pName.value,
+   price: +pPrice.value,
+   desc: pDesc.value,
+   ing: pIng.value,
+   images: imgs.length ? imgs : old.images || []
+  });
+ } else {
+  await addDoc(collection(db, "products"), {
+   name: pName.value,
+   price: +pPrice.value,
+   desc: pDesc.value,
+   ing: pIng.value,
+   images: imgs
+  });
+ }
+
+ // reset
+ editing = null;
+ pName.value = "";
+ pPrice.value = "";
+ pDesc.value = "";
+ pIng.value = "";
+ pImages.value = "";
+
  show("home");
  loadProducts();
 };
