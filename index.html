@@ -294,11 +294,6 @@ body{
 <header>
  <b>The Aachar Port</b>
  <div>
-  <a onclick="show('home')">Home</a>
-  <a onclick="show('cart')">Cart</a>
-  <a id="loginLink" onclick="show('login')">Login</a>
-  <a id="adminLink" style="display:none" onclick="show('admin')">Admin</a>
-  <a id="logoutBtn" style="display:none" onclick="logout()">Logout</a>
  </div>
 </header>
 
@@ -350,27 +345,33 @@ body{
  <div class="cart-bar" id="cartBar"></div>
 </section>
 
-<!-- Bottom Navigation -->
+<!-- Bottom Navigation (Main Navigation System) -->
 <div class="bottom-nav">
   <div class="nav-item active" onclick="show('home');setActive(this)">
     <span class="icon">🏠</span>
     <small>Home</small>
   </div>
 
-  <div class="nav-item" onclick="alert('Categories coming soon');setActive(this)">
-    <span class="icon">◻◻</span>
-    <small>Categories</small>
+  <div class="nav-item" onclick="show('cart');setActive(this)">
+    <span class="icon">🛒</span>
+    <small>Cart</small>
   </div>
 
-  <div class="nav-item" onclick="window.print();setActive(this)">
-    <span class="icon">🖨</span>
-    <small>Print</small>
+  <div class="nav-item" id="loginNav" onclick="show('login');setActive(this)">
+    <span class="icon">🔐</span>
+    <small>Login</small>
   </div>
 
-  <div class="nav-item" onclick="alert('Ambulance');setActive(this)">
-    <span class="icon">➕</span>
-    <small>Ambulance</small>
-    <span class="badge">New</span>
+  <div class="nav-item" id="adminNav" style="display:none"
+       onclick="show('admin');setActive(this)">
+    <span class="icon">⚙️</span>
+    <small>Admin</small>
+  </div>
+
+  <div class="nav-item" id="logoutNav" style="display:none"
+       onclick="logout();setActive(this)">
+    <span class="icon">🚪</span>
+    <small>Logout</small>
   </div>
 </div>
 
@@ -614,7 +615,8 @@ window.addProduct=async()=>{
 };
 
 window.setActive = el => {
- document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+ document.querySelectorAll('.nav-item')
+  .forEach(i=>i.classList.remove('active'));
  el.classList.add('active');
 };
 
