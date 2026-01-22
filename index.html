@@ -59,6 +59,52 @@ section{padding:16px}
  padding:6px 16px;border-radius:10px;font-weight:bold
 }
 
+/* QTY BOX */
+.qty-box{
+ position:absolute;
+ bottom:12px;
+ right:12px;
+ background:#fff;
+ color:#000;
+ border-radius:10px;
+ display:flex;
+ align-items:center;
+ overflow:hidden;
+ height:32px;
+}
+
+.qty-box button{
+ width:32px;
+ height:32px;
+ border:none;
+ background:#f2f2f2;
+ font-size:18px;
+ cursor:pointer;
+}
+
+.qty-box span{
+ width:32px;
+ text-align:center;
+ font-weight:bold;
+}
+
+/* ADMIN ACTIONS */
+.admin-actions{
+ margin-top:10px;
+ display:flex;
+ gap:6px;
+}
+
+.admin-actions button{
+ background:#333;
+ color:#fff;
+ border:none;
+ padding:6px 8px;
+ border-radius:6px;
+ font-size:11px;
+ cursor:pointer;
+}
+
 /* PRODUCT PAGE */
 #productPage{padding:0}
 
@@ -303,6 +349,46 @@ function updateBar(id){
    <button onclick="addQty('${id}')">+</button>
   </div>`;
 }
+
+ /* ADMIN */
+window.deleteProduct=async id=>{
+ if(confirm("Delete product?")){
+  await deleteDoc(doc(db,"products",id));
+  loadProducts();
+ }
+};
+
+window.editProduct=id=>{
+ const p=productsData.find(x=>x.id===id);
+ pName.value=p.name;
+ pPrice.value=p.price;
+ pDesc.value=p.desc;
+ pIng.value=p.ing;
+ editing=id;
+ show("admin");
+};
+
+window.addProduct=async()=>{
+ let imgs=[];
+ for(const f of pImages.files){
+  const fd=new FormData();
+  fd.append("file",f);
+  fd.append("upload_preset",UPLOAD_PRESET);
+  const r=await fetch(
+   `https://api.cloudinary.com/v1_1/${CLOUDINARY}/image/upload`,
+   {method:"POST",body:fd}
+  );
+  imgs.push((await r.json()).secure_url);
+ }
+ editing
+ ? await updateDoc(doc(db,"products",editing),
+   {name:pName.value,price:+pPrice.value,desc:pDesc.value,ing:pIng.value,images:imgs})
+ : await addDoc(collection(db,"products"),
+   {name:pName.value,price:+pPrice.value,desc:pDesc.value,ing:pIng.value,images:imgs});
+ editing=null;
+ show("home");
+ loadProducts();
+};
 </script>
 </body>
 </html>
