@@ -411,9 +411,10 @@ window.logout=async()=>{await signOut(auth);show("home")};
 
 onAuthStateChanged(auth,u=>{
  user=u;
- loginLink.style.display=u?"none":"inline";
- logoutBtn.style.display=u?"inline":"none";
- adminLink.style.display=u&&u.email===ADMIN?"inline":"none";
+ document.getElementById("loginNav").style.display = u ? "none" : "flex";
+ document.getElementById("logoutNav").style.display = u ? "flex" : "none";
+ document.getElementById("adminNav").style.display =
+  u && u.email===ADMIN ? "flex" : "none";
  loadProducts();
  show("home");
 });
