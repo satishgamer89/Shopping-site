@@ -929,6 +929,32 @@ window.setActive = el => {
  el.classList.add('active');
 };
 
+function setActive(el) {
+  document.querySelectorAll('.nav-item')
+    .forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+}
+
+async function doLogin() {
+  try {
+    if (!lEmail.value || !lPass.value) {
+      alert("Please enter email and password");
+      return;
+    }
+
+    await signInWithEmailAndPassword(
+      auth,
+      lEmail.value.trim(),
+      lPass.value
+    );
+
+    alert("Login successful");
+    show("home");
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
  
 let lastScrollY=0;
 window.addEventListener("scroll",()=>{
