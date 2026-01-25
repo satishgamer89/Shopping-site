@@ -559,7 +559,7 @@ body.hide-bottom-nav .bottom-nav{
 </div>
 
  
-<script>
+<script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth,onAuthStateChanged,signOut,
  createUserWithEmailAndPassword,signInWithEmailAndPassword }
@@ -599,6 +599,18 @@ let user=null,productsData=[],cart=[],editing=null,currentImages=[],imgIndex=0,a
   document.body.classList.remove("hide-bottom-nav");
  }
 };
+
+// expose for inline handlers (mobile fix)
+window.show = show;
+window.login = login;
+window.signup = signup;
+window.logout = logout;
+window.openProduct = openProduct;
+window.addQty = addQty;
+window.removeQty = removeQty;
+window.toggleHighlights = toggleHighlights;
+window.editProduct = editProduct;
+window.deleteProduct = deleteProduct;
 
 
 window.login=()=>signInWithEmailAndPassword(auth,lEmail.value,lPass.value);
