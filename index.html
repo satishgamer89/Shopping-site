@@ -602,9 +602,6 @@ let user=null,productsData=[],cart=[],editing=null,currentImages=[],imgIndex=0,a
 
 // expose for inline handlers (mobile fix)
 window.show = show;
-window.login = login;
-window.signup = signup;
-window.logout = logout;
 window.openProduct = openProduct;
 window.addQty = addQty;
 window.removeQty = removeQty;
@@ -624,8 +621,9 @@ onAuthStateChanged(auth,u=>{
  document.getElementById("adminNav").style.display =
   u && u.email===ADMIN ? "flex" : "none";
  show("home");
+ loadProducts();
 });
-loadProducts();
+
  
 async function loadProducts(){
  products.innerHTML="";
