@@ -443,11 +443,11 @@ body.hide-bottom-nav .bottom-nav{
 <section id="login" style="display:none">
  <input id="lEmail" placeholder="Email"><br><br>
  <input id="lPass" type="password" placeholder="Password"><br><br>
- <button onclick="login()">Login</button>
+ <button onclick="doLogin()">Login</button>
  <hr>
  <input id="sEmail" placeholder="Email"><br><br>
  <input id="sPass" type="password" placeholder="Password"><br><br>
- <button onclick="signup()">Signup</button>
+ <button onclick="doSignup()">Signup</button>
 </section>
 
 <section id="admin" style="display:none">
@@ -608,8 +608,12 @@ window.removeQty = removeQty;
 window.toggleHighlights = toggleHighlights;
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
+window.setActive = setActive;
+window.doLogin = doLogin;
+window.doSignup = doSignup;
+window.logout = logout;
 
-window.login = async () => {
+window.dologin = async () => {
   try {
     if (!lEmail.value || !lPass.value) {
       alert("Please enter email and password");
@@ -630,7 +634,7 @@ window.login = async () => {
   }
 };
 
-window.signup = async () => {
+window.dosignup = async () => {
   try {
     if (!sEmail.value || !sPass.value) {
       alert("Please enter email and password");
