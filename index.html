@@ -100,6 +100,7 @@ section{padding:16px}
  font-size:13px;
  font-weight:bold;
  cursor:pointer;
+ z-index:5;
 }
 .qty-box{
  position:absolute;
@@ -112,6 +113,7 @@ section{padding:16px}
  align-items:center;
  overflow:hidden;
  height:32px;
+ z-index:5;
 }
 .qty-box button{
  width:32px;
@@ -529,7 +531,7 @@ body.hide-bottom-nav .bottom-nav{
     <small>Home</small>
   </div>
 
-  <div class="nav-item" onclick="show('cart');setActive(this)">
+  <div class="nav-item" data-nav="cart" onclick="show('cart');setActive(this)">
     <span class="icon">🛒</span>
     <small>Cart</small>
   </div>
@@ -600,18 +602,18 @@ onAuthStateChanged(auth,u=>{
  document.getElementById("logoutNav").style.display = u ? "flex" : "none";
  document.getElementById("adminNav").style.display =
   u && u.email===ADMIN ? "flex" : "none";
- loadProducts();
  show("home");
 });
-
+loadProducts();
+ 
 async function loadProducts(){
- products.innerHTML="";
+ productsEl.innerHTML="";
  const snap=await getDocs(collection(db,"products"));
  productsData=[];
  snap.forEach(d=>{
   const p={id:d.id,...d.data()};
   productsData.push(p);
-  products.innerHTML+=`
+  productsEl.innerHTML+=`
   <div class="card">
    <img src="${p.images?.[0]||''}" onclick="openProduct('${p.id}')">
    <h3>${p.name}</h3>
@@ -664,7 +666,7 @@ Object.keys(map).forEach(k=>{
  startAutoSlide();
  show("productPage");
 };
-
+ 
 function renderDots(){
  dots.innerHTML="";
  currentImages.forEach((_,i)=>{
@@ -774,15 +776,7 @@ function updateProductQtyUI(id){
    <button onclick="addQty('${id}')">+</button>
   </div>`;
 }
-function renderCart(){
- cartItems.innerHTML="";
- let t=0;
- cart.forEach(c=>{
-  t+=c.price*c.qty;
-  cartItems.innerHTML+=`${c.name} × ${c.qty} = ₹${c.price*c.qty}<br>`;
- });
- total.innerText=t;
-}
+
 
 
  // toggle product highlights
@@ -867,7 +861,18 @@ window.setActive = el => {
   .forEach(i=>i.classList.remove('active'));
  el.classList.add('active');
 };
+ 
+const productsEl = document.getElementById("products");
+productsEl.innerHTML="";
 
+try{
+ const r=await fetch(...);
+ imgs.push((await r.json()).secure_url);
+}catch(e){
+ alert("Image upload failed");
+}
+
+ 
 let lastScrollY=0;
 window.addEventListener("scroll",()=>{
  const nav=document.querySelector(".bottom-nav");
