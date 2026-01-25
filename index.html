@@ -871,13 +871,6 @@ window.setActive = el => {
  el.classList.add('active');
 };
 
-try{
- const r=await fetch(...);
- imgs.push((await r.json()).secure_url);
-}catch(e){
- alert("Image upload failed");
-}
-
  
 let lastScrollY=0;
 window.addEventListener("scroll",()=>{
