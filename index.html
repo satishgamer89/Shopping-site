@@ -33,8 +33,10 @@ header a{
  font-size:14px;
  cursor:pointer;
 }
-section{padding:16px}
- section{
+
+section{
+ padding:16px;
+ padding-bottom:120px;
  animation:iosSlide .35s cubic-bezier(.4,0,.2,1);
 }
 
@@ -62,6 +64,7 @@ section{padding:16px}
  display:flex;
  flex-direction:column;
  min-height:270px;
+ z-index:1;
 }
 .card img{
  width:100%;
@@ -325,6 +328,7 @@ section{padding:16px}
  bottom:12px;
  left:12px;
  right:12px;
+ pointer-events:auto;
 
  display:flex;
  justify-content:space-around;
@@ -577,6 +581,11 @@ const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
 
+const products=document.getElementById("products");
+const cartItems=document.getElementById("cartItems");
+const cartBar=document.getElementById("cartBar");
+
+
 let user=null,productsData=[],cart=[],editing=null,currentImages=[],imgIndex=0,autoSlide,touchXStart=0;
 
  window.show=id=>{
@@ -607,13 +616,13 @@ onAuthStateChanged(auth,u=>{
 loadProducts();
  
 async function loadProducts(){
- productsEl.innerHTML="";
+ products.innerHTML="";
  const snap=await getDocs(collection(db,"products"));
  productsData=[];
  snap.forEach(d=>{
   const p={id:d.id,...d.data()};
   productsData.push(p);
-  productsEl.innerHTML+=`
+  products.innerHTML+=`
   <div class="card">
    <img src="${p.images?.[0]||''}" onclick="openProduct('${p.id}')">
    <h3>${p.name}</h3>
@@ -861,9 +870,6 @@ window.setActive = el => {
   .forEach(i=>i.classList.remove('active'));
  el.classList.add('active');
 };
- 
-const productsEl = document.getElementById("products");
-productsEl.innerHTML="";
 
 try{
  const r=await fetch(...);
