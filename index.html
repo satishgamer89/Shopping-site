@@ -609,10 +609,54 @@ window.toggleHighlights = toggleHighlights;
 window.editProduct = editProduct;
 window.deleteProduct = deleteProduct;
 
+window.login = async () => {
+  try {
+    if (!lEmail.value || !lPass.value) {
+      alert("Please enter email and password");
+      return;
+    }
 
-window.login=()=>signInWithEmailAndPassword(auth,lEmail.value,lPass.value);
-window.signup=()=>createUserWithEmailAndPassword(auth,sEmail.value,sPass.value);
-window.logout=async()=>{await signOut(auth);show("home")};
+    await signInWithEmailAndPassword(
+      auth,
+      lEmail.value.trim(),
+      lPass.value
+    );
+
+    alert("Login successful");
+    show("home");
+
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+window.signup = async () => {
+  try {
+    if (!sEmail.value || !sPass.value) {
+      alert("Please enter email and password");
+      return;
+    }
+
+    await createUserWithEmailAndPassword(
+      auth,
+      sEmail.value.trim(),
+      sPass.value
+    );
+
+    alert("Account created");
+    show("home");
+
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+window.logout = async () => {
+  await signOut(auth);
+  alert("Logged out");
+  show("home");
+};
+
 
 onAuthStateChanged(auth,u=>{
  user=u;
