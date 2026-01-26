@@ -620,15 +620,6 @@ function updateProductQtyUI(id){
    <button onclick="addQty('${id}')">+</button>
   </div>`;
 }
-function renderCart(){
- cartItems.innerHTML="";
- let t=0;
- cart.forEach(c=>{
-  t+=c.price*c.qty;
-  cartItems.innerHTML+=`${c.name} × ${c.qty} = ₹${c.price*c.qty}<br>`;
- });
- total.innerText=t;
-}
 
 // ADMIN
 window.deleteProduct=async id=>{
