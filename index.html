@@ -455,6 +455,31 @@ const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
 
+// ===== ANDROID STRICT FIX (REQUIRED) =====
+const products = document.getElementById("products");
+const cartItems = document.getElementById("cartItems");
+const cartBar = document.getElementById("cartBar");
+const total = document.getElementById("total");
+
+const pdImg = document.getElementById("pdImg");
+const pdName = document.getElementById("pdName");
+const pdPrice = document.getElementById("pdPrice");
+const pdDesc = document.getElementById("pdDesc");
+const pdIng = document.getElementById("pdIng");
+const dots = document.getElementById("dots");
+
+const lEmail = document.getElementById("lEmail");
+const lPass = document.getElementById("lPass");
+const sEmail = document.getElementById("sEmail");
+const sPass = document.getElementById("sPass");
+
+const pName = document.getElementById("pName");
+const pPrice = document.getElementById("pPrice");
+const pDesc = document.getElementById("pDesc");
+const pIng = document.getElementById("pIng");
+const pImages = document.getElementById("pImages");
+ 
+
 let user=null,productsData=[],cart=[],editing=null,currentImages=[],imgIndex=0,autoSlide,touchXStart=0;
 
 window.show=id=>{
