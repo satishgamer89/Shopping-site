@@ -405,7 +405,7 @@ section{padding:16px}
     <small>Home</small>
   </div>
 
-  <div class="nav-item" onclick="show('cart');setActive(this)">
+   <div class="nav-item" data-nav="cart" onclick="show('cart');setActive(this)">
     <span class="icon">🛒</span>
     <small>Cart</small>
   </div>
@@ -428,7 +428,6 @@ section{padding:16px}
   </div>
 </div>
 
-
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth,onAuthStateChanged,signOut,
@@ -450,8 +449,11 @@ const ADMIN="satishbhattrai54@gmail.com";
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
+ 
 
-// ===== ANDROID STRICT FIX (REQUIRED) =====
+let user=null,productsData=[],cart=[],editing=null,currentImages=[],imgIndex=0,autoSlide,touchXStart=0;
+
+// ===== ANDROID DOM BIND FIX =====
 const products = document.getElementById("products");
 const cartItems = document.getElementById("cartItems");
 const cartBar = document.getElementById("cartBar");
@@ -474,10 +476,9 @@ const pPrice = document.getElementById("pPrice");
 const pDesc = document.getElementById("pDesc");
 const pIng = document.getElementById("pIng");
 const pImages = document.getElementById("pImages");
+
+
  
-
-let user=null,productsData=[],cart=[],editing=null,currentImages=[],imgIndex=0,autoSlide,touchXStart=0;
-
 window.show=id=>{
  document.querySelectorAll("section").forEach(s=>s.style.display="none");
  document.getElementById(id).style.display="block";
