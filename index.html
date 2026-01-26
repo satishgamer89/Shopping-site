@@ -489,7 +489,9 @@ const pDesc = document.getElementById("pDesc");
 const pIng = document.getElementById("pIng");
 const pImages = document.getElementById("pImages");
 
+ 
 window.show = id => {
+
   // hide all sections
   document.querySelectorAll("section")
     .forEach(s => s.style.display = "none");
@@ -497,16 +499,21 @@ window.show = id => {
   // show selected section
   document.getElementById(id).style.display = "block";
 
-  // handle bottom nav visibility
   const nav = document.getElementById("bottomNav");
 
- if (id === "productPage") {
-  nav.classList.add("hide");
-} else {
+  // reset scroll hide state
   nav.classList.remove("hide");
-}
 
+  // hide nav ONLY on product page
+  if (id === "productPage") {
+    nav.classList.add("hide");
+  }
+
+  // reset scroll position for safety
+  window.scrollTo(0, 0);
 };
+
+
 
 window.login=()=>signInWithEmailAndPassword(auth,lEmail.value,lPass.value);
 window.signup=()=>createUserWithEmailAndPassword(auth,sEmail.value,sPass.value);
@@ -745,18 +752,25 @@ window.setActive = el => {
  el.classList.add('active');
 };
 
-let lastScrollY=0;
-window.addEventListener("scroll",()=>{
- const nav=document.querySelector(".bottom-nav");
- if(!nav) return;
+let lastScrollY = 0;
+window.addEventListener("scroll", () => {
+  const nav = document.getElementById("bottomNav");
+  if (!nav) return;
 
- if(window.scrollY>lastScrollY && window.scrollY>60){
-  nav.classList.add("hide");
- }else{
-  nav.classList.remove("hide");
- }
- lastScrollY=window.scrollY;
+  // if on product page, do nothing
+  if (document.getElementById("productPage").style.display === "block") {
+    return;
+  }
+
+  if (window.scrollY > lastScrollY && window.scrollY > 60) {
+    nav.classList.add("hide");
+  } else {
+    nav.classList.remove("hide");
+  }
+
+  lastScrollY = window.scrollY;
 });
+
 
  
 </script>
