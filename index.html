@@ -332,6 +332,15 @@ section{padding:16px}
  opacity:0;
  transition:all .35s cubic-bezier(.4,0,.2,1);
 }
+#bottomNav {
+  transition: transform .3s ease, opacity .3s ease;
+}
+
+#bottomNav.hide {
+  transform: translateY(120%);
+  opacity: 0;
+}
+
  
 /* Desktop safe */
 @media(min-width:768px){
@@ -402,7 +411,7 @@ section{padding:16px}
 </section>
 
 <!-- Bottom Navigation (Main Navigation System) -->
-<div class="bottom-nav">
+<div class="bottom-nav" id="bottomNav">
   <div class="nav-item active" onclick="show('home');setActive(this)">
     <span class="icon">🏠</span>
     <small>Home</small>
@@ -480,11 +489,23 @@ const pDesc = document.getElementById("pDesc");
 const pIng = document.getElementById("pIng");
 const pImages = document.getElementById("pImages");
 
+window.show = id => {
+  // hide all sections
+  document.querySelectorAll("section")
+    .forEach(s => s.style.display = "none");
 
- 
-window.show=id=>{
- document.querySelectorAll("section").forEach(s=>s.style.display="none");
- document.getElementById(id).style.display="block";
+  // show selected section
+  document.getElementById(id).style.display = "block";
+
+  // handle bottom nav visibility
+  const nav = document.getElementById("bottomNav");
+
+ if (id === "productPage") {
+  nav.classList.add("hide");
+} else {
+  nav.classList.remove("hide");
+}
+
 };
 
 window.login=()=>signInWithEmailAndPassword(auth,lEmail.value,lPass.value);
@@ -526,6 +547,7 @@ async function loadProducts(){
 }
 
 window.openProduct=id=>{
+ document.getElementById("bottomNav").style.display = "none";
  const p=productsData.find(x=>x.id===id);
  currentImages=p.images||[];
  imgIndex=0;
