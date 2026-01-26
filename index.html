@@ -493,25 +493,27 @@ const pImages = document.getElementById("pImages");
 window.show = id => {
 
   // hide all sections
-  document.querySelectorAll("section")
-    .forEach(s => s.style.display = "none");
+  document.querySelectorAll("section").forEach(
+    s => s.style.display = "none"
+  );
 
   // show selected section
-  document.getElementById(id).style.display = "block";
+  const page = document.getElementById(id);
+  if (page) page.style.display = "block";
 
+  // navbar control
   const nav = document.getElementById("bottomNav");
 
-  // reset scroll hide state
-  nav.classList.remove("hide");
-
-  // hide nav ONLY on product page
   if (id === "productPage") {
-    nav.classList.add("hide");
+    nav.style.display = "none";
+  } else {
+    nav.style.display = "flex";
   }
 
-  // reset scroll position for safety
-  window.scrollTo(0, 0);
+  // reset scroll
+  window.scrollTo(0,0);
 };
+
 
 
 
@@ -752,24 +754,7 @@ window.setActive = el => {
  el.classList.add('active');
 };
 
-let lastScrollY = 0;
-window.addEventListener("scroll", () => {
-  const nav = document.getElementById("bottomNav");
-  if (!nav) return;
 
-  // if on product page, do nothing
-  if (document.getElementById("productPage").style.display === "block") {
-    return;
-  }
-
-  if (window.scrollY > lastScrollY && window.scrollY > 60) {
-    nav.classList.add("hide");
-  } else {
-    nav.classList.remove("hide");
-  }
-
-  lastScrollY = window.scrollY;
-});
 
 
  
