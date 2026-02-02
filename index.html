@@ -383,15 +383,35 @@ section{padding:16px}
   }
 }
 
+.home-logo{
+  cursor:pointer;
+}
+
+.home-logo:active{
+  transform: scale(0.96);
+}
+.home-logo:hover{
+  filter:
+    brightness(1)
+    contrast(1.1)
+    drop-shadow(0 0 10px rgba(255,255,255,0.3));
+} 
+
 </style>
 </head>
 
 <body>
- 
+
  <header>
-  <img src="IMG_2134.png" alt="The Aachar Port" class="logo">
+  <img
+    src="IMG_2134.png"
+    alt="The Aachar Port"
+    class="logo home-logo"
+    onclick="goHome()"
+  >
   <div></div>
 </header>
+
 
 <section id="home">
  <h2>Products</h2>
@@ -806,6 +826,16 @@ window.addEventListener("scroll", () => {
   lastScrollY = window.scrollY;
 });
 
+window.goHome = () => {
+  show("home");
+
+  // activate Home tab in bottom nav
+  document.querySelectorAll('.nav-item')
+    .forEach(i => i.classList.remove('active'));
+
+  const homeTab = document.querySelector('.nav-item');
+  if (homeTab) homeTab.classList.add('active');
+};
 
  
 </script>
