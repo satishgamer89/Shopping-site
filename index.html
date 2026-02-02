@@ -349,12 +349,34 @@ section{padding:16px}
   margin:auto;
  }
 }
-
- .logo{
-  height: 32px;        /* adjust if needed */
+.logo{
+  height: 32px;              /* slightly taller */
+  width: auto;
+  max-width: 220px;          /* increases width safely */
   object-fit: contain;
-  filter: brightness(0.85); /* keeps pencil look soft */
+
+  /* soft pencil / handwritten feel */
+ filter:
+    brightness(0.9)
+    contrast(1.05)
+    drop-shadow(0 0 6px rgba(255,255,255,0.18));
+
+  /* subtle glow */
+  text-shadow: 0 0 8px rgba(255,255,255,0.15);
+
+  /* animation */
+  opacity: 0;
+  transform: translateY(6px);
+  animation: logoFade 0.8s ease-out forwards;
 }
+
+@keyframes logoFade{
+  to{
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 </style>
 </head>
