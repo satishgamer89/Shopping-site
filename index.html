@@ -350,24 +350,24 @@ section{padding:16px}
  }
 }
 .logo{
-  height: 32px;              /* slightly taller */
+  height: 52px;              /* slightly taller */
   width: auto;
-  max-width: 220px;          /* increases width safely */
+  max-width: 280px;          /* increases width safely */
   object-fit: contain;
 
   /* soft pencil / handwritten feel */
  filter:
-    brightness(0.9)
-    contrast(1.05)
-    drop-shadow(0 0 6px rgba(255,255,255,0.18));
+    brightness(0.95)
+    contrast(1.08)
+    drop-shadow(0 0 8px rgba(255,255,255,0.22));
 
   /* subtle glow */
   text-shadow: 0 0 8px rgba(255,255,255,0.15);
 
   /* animation */
   opacity: 0;
-  transform: translateY(6px);
-  animation: logoFade 0.8s ease-out forwards;
+  transform: translateY(8px);
+  animation: logoFade 0.9s ease-out forwards;
 }
 
 @keyframes logoFade{
@@ -376,7 +376,12 @@ section{padding:16px}
     transform: translateY(0);
   }
 }
-
+@media (min-width:768px){
+  .logo{
+    height: 38px;
+    max-width: 240px;
+  }
+}
 
 </style>
 </head>
