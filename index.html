@@ -350,23 +350,26 @@ section{padding:16px}
  }
 }
 .logo{
-  height: 52px;              /* slightly taller */
+  height: 32px;              /* slightly taller */
   width: auto;
-  max-width: 280px;          /* increases width safely */
+  max-width: 260px;          /* increases width safely */
   object-fit: contain;
+
+ transform: scale(1.35);    /* 👈 THIS is the key */
+  transform-origin: left center;
+
 
   /* soft pencil / handwritten feel */
  filter:
-    brightness(0.95)
-    contrast(1.08)
-    drop-shadow(0 0 8px rgba(255,255,255,0.22));
+    brightness(1.35)
+    contrast(1.15)
+    drop-shadow(0 0 14px rgba(255,255,255,0.45));
 
   /* subtle glow */
   text-shadow: 0 0 8px rgba(255,255,255,0.15);
 
   /* animation */
   opacity: 0;
-  transform: translateY(8px);
   animation: logoFade 0.9s ease-out forwards;
 }
 
