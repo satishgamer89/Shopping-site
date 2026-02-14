@@ -349,31 +349,50 @@ section{padding:16px}
   margin:auto;
  }
 }
-/* ===== Professional Header ===== */
+/* ===== Professional Header ===== *//* ===== Premium Spice-Themed Header ===== */
 .main-header{
-  background: rgba(20,20,20,0.85);
-  backdrop-filter: blur(14px) saturate(160%);
-  -webkit-backdrop-filter: blur(14px) saturate(160%);
-  padding: 14px 16px;
+  background: linear-gradient(90deg,#1b0f05,#2b1407);
+  padding: 16px 18px;
   display:flex;
   justify-content:space-between;
   align-items:center;
   position:sticky;
   top:0;
   z-index:1000;
-  border-bottom:1px solid rgba(255,255,255,0.05);
+  border-bottom:1px solid rgba(255,140,0,0.2);
 }
 
-.brand{
-  font-size:20px;
-  font-weight:700;
-  letter-spacing:0.5px;
-  background:linear-gradient(90deg,#1faa00,#6dff4d);
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
+/* Brand Container */
+.brand-container{
+  display:flex;
+  flex-direction:column;
   cursor:pointer;
 }
 
+/* Brand Name */
+.brand-name{
+  font-size:22px;
+  font-weight:700;
+  font-family: 'Georgia', serif;
+  letter-spacing:0.5px;
+
+  background: linear-gradient(90deg,#ff9f1c,#ff3c00);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
+
+  text-shadow: 0 0 18px rgba(255,100,0,0.25);
+}
+
+/* Tagline */
+.brand-tagline{
+  font-size:11px;
+  letter-spacing:1px;
+  color:#f5cba7;
+  margin-top:2px;
+  text-transform:uppercase;
+}
+
+/* Search Area */
 .header-actions{
   display:flex;
   align-items:center;
@@ -382,21 +401,21 @@ section{padding:16px}
 
 #searchInput{
   padding:6px 10px;
-  border-radius:8px;
+  border-radius:10px;
   border:none;
   outline:none;
   font-size:13px;
-  background:#222;
+  background:#2a1a12;
   color:#fff;
   width:140px;
 }
 
 .search-btn{
-  background:#1faa00;
+  background:linear-gradient(135deg,#ff9f1c,#ff3c00);
   border:none;
   color:#fff;
   padding:6px 10px;
-  border-radius:8px;
+  border-radius:10px;
   cursor:pointer;
   font-size:14px;
   transition:0.2s ease;
@@ -412,16 +431,18 @@ section{padding:16px}
 
 <body>
 
- <header class="main-header">
-  <div class="brand" onclick="goHome()">
-    The Aachar Port
+<header class="main-header">
+  <div class="brand-container" onclick="goHome()">
+    <div class="brand-name">The Aachar Port</div>
+    <div class="brand-tagline">Authentic Indian Flavours</div>
   </div>
 
   <div class="header-actions">
-    <input type="text" id="searchInput" placeholder="Search products..." />
+    <input type="text" id="searchInput" placeholder="Search pickles..." />
     <button class="search-btn" onclick="searchProducts()">🔍</button>
   </div>
 </header>
+
 
 
 <section id="home">
