@@ -349,69 +349,78 @@ section{padding:16px}
   margin:auto;
  }
 }
-.logo{
-  height: 32px;              /* slightly taller */
-  width: auto;
-  max-width: 260px;          /* increases width safely */
-  object-fit: contain;
-
- transform: scale(3.5);    /* 👈 THIS is the key */
-  transform-origin: left center;
-
-
-  /* soft pencil / handwritten feel */
- filter:
-    brightness(1.5)
-    contrast(1.15)
-    drop-shadow(0 0 14px rgba(255,255,255,0.45));
-
-  /* subtle glow */
-  text-shadow: 0 0 8px rgba(255,255,255,0.15);
-
-  /* animation */
-  opacity: 0;
-  animation: logoFade 0.9s ease-out forwards;
+/* ===== Professional Header ===== */
+.main-header{
+  background: rgba(20,20,20,0.85);
+  backdrop-filter: blur(14px) saturate(160%);
+  -webkit-backdrop-filter: blur(14px) saturate(160%);
+  padding: 14px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  position:sticky;
+  top:0;
+  z-index:1000;
+  border-bottom:1px solid rgba(255,255,255,0.05);
 }
 
-@keyframes logoFade{
-  to{
-    opacity: 1;
-  }
-}
-@media (min-width:768px){
-  .logo{
-    height: 38px;
-    max-width: 240px;
-  }
-}
-
-.home-logo{
+.brand{
+  font-size:20px;
+  font-weight:700;
+  letter-spacing:0.5px;
+  background:linear-gradient(90deg,#1faa00,#6dff4d);
+  -webkit-background-clip:text;
+  -webkit-text-fill-color:transparent;
   cursor:pointer;
 }
 
-.home-logo:active{
-  transform: scale(0.96);
+.header-actions{
+  display:flex;
+  align-items:center;
+  gap:6px;
 }
-.home-logo:hover{
-  filter:
-    brightness(1)
-    contrast(1.1)
-    drop-shadow(0 0 10px rgba(255,255,255,0.3));
-} 
+
+#searchInput{
+  padding:6px 10px;
+  border-radius:8px;
+  border:none;
+  outline:none;
+  font-size:13px;
+  background:#222;
+  color:#fff;
+  width:140px;
+}
+
+.search-btn{
+  background:#1faa00;
+  border:none;
+  color:#fff;
+  padding:6px 10px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:14px;
+  transition:0.2s ease;
+}
+
+.search-btn:active{
+  transform:scale(0.92);
+}
+ 
 
 </style>
 </head>
 
 <body>
 
- <header>
-  <img
-    src="IMG_2134.png"
-    alt="The Aachar Port"
-    class="logo home-logo"
-    onclick="goHome()"
-  >
-  <div></div>
+ <header class="main-header">
+  <div class="brand" onclick="goHome()">
+    The Aachar Port
+  </div>
+
+  <div class="header-actions">
+    <input type="text" id="searchInput" placeholder="Search products..." />
+    <button class="search-btn" onclick="searchProducts()">🔍</button>
+  </div>
 </header>
 
 
@@ -608,6 +617,21 @@ async function loadProducts(){
  });
 }
 
+window.searchProducts = () => {
+  const keyword = document.getElementById("searchInput").value.toLowerCase();
+  const cards = document.querySelectorAll(".card");
+
+  cards.forEach(card => {
+    const name = card.querySelector("h3").innerText.toLowerCase();
+    if (name.includes(keyword)) {
+      card.style.display = "flex";
+    } else {
+      card.style.display = "none";
+    }
+  });
+};
+
+ 
 window.openProduct=id=>{
  document.getElementById("bottomNav").style.display = "none";
  const p=productsData.find(x=>x.id===id);
