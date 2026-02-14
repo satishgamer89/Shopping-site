@@ -359,16 +359,23 @@ section{padding:16px}
  }
 }
 /* ===== Professional Header ===== *//* ===== Premium Spice-Themed Header ===== */
+/* ===== Responsive Premium Header ===== */
 .main-header{
-  background: linear-gradient(90deg,#1b0f05,#2b1407);
-  padding: 16px 18px;
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
   position:sticky;
   top:0;
   z-index:1000;
+
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+
+  padding:clamp(10px,2vw,18px) clamp(12px,3vw,40px);
+
+  background:linear-gradient(90deg,#1b0f05,#2b1407);
   border-bottom:1px solid rgba(255,140,0,0.2);
+
+  flex-wrap:wrap;
+  gap:10px;
 }
 
 /* Brand Container */
@@ -378,61 +385,73 @@ section{padding:16px}
   cursor:pointer;
 }
 
-/* Brand Name */
+/* Brand Name Responsive */
 .brand-name{
-  font-size:22px;
+  font-family:'Georgia', serif;
   font-weight:700;
-  font-family: 'Georgia', serif;
-  letter-spacing:0.5px;
 
-  background: linear-gradient(90deg,#ff9f1c,#ff3c00);
+  font-size:clamp(16px,3vw,26px);
+
+  background:linear-gradient(90deg,var(--secondary),var(--primary));
   -webkit-background-clip:text;
   -webkit-text-fill-color:transparent;
-
-  text-shadow: 0 0 18px rgba(255,100,0,0.25);
 }
 
-/* Tagline */
+/* Tagline Responsive */
 .brand-tagline{
-  font-size:11px;
+  font-size:clamp(9px,1.5vw,12px);
+  color:var(--muted);
   letter-spacing:1px;
-  color:#f5cba7;
-  margin-top:2px;
   text-transform:uppercase;
 }
 
-/* Search Area */
+/* Header Actions */
 .header-actions{
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:8px;
+  flex-shrink:0;
 }
 
+/* Search Input Responsive */
 #searchInput{
   padding:6px 10px;
   border-radius:10px;
   border:none;
   outline:none;
-  font-size:13px;
+
+  font-size:clamp(12px,1.8vw,14px);
+
   background:#2a1a12;
   color:#fff;
-  width:140px;
+
+  width:clamp(100px,20vw,220px);
+  transition:0.2s ease;
 }
 
+#searchInput:focus{
+  width:clamp(140px,30vw,260px);
+}
+
+/* Search Button */
 .search-btn{
-  background:linear-gradient(135deg,#ff9f1c,#ff3c00);
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
   border:none;
   color:#fff;
-  padding:6px 10px;
+
+  padding:6px 12px;
   border-radius:10px;
+
   cursor:pointer;
-  font-size:14px;
+  font-size:clamp(12px,2vw,14px);
+
   transition:0.2s ease;
 }
 
 .search-btn:active{
   transform:scale(0.92);
 }
+
 
  /* Spice Particle Container */
 .spice-particles{
@@ -474,6 +493,13 @@ section{padding:16px}
   }
 }
 
+ @media(min-width:1024px){
+  .main-header{
+    max-width:1200px;
+    margin:auto;
+  }
+}
+ 
 
 </style>
 </head>
