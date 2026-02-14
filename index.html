@@ -1069,7 +1069,10 @@ window.placeOrder = async () => {
   try{
     await addDoc(collection(db,"orders"), orderData);
     // WhatsApp message
-const message = `
+try{
+  await addDoc(collection(db,"orders"), orderData);
+
+  const message = `
 🛒 New Order - The Aachar Port
 
 Name: ${name}
@@ -1082,13 +1085,16 @@ ${cart.map(i=>`${i.name} x${i.qty} = ₹${i.price*i.qty}`).join("\n")}
 Total: ₹${orderData.total}
 `;
 
-// Replace with YOUR WhatsApp number
-const whatsappNumber = "918383897693"; 
+  const whatsappNumber = "918383897693"; // your number
 
-window.open(
-  `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`,
-  "_blank"
-);
+  window.location.href =
+    `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
+
+}catch(err){
+  console.error("Order error:", err);
+  alert("Order failed: " + err.message);
+}
+
 
     alert("Order Placed Successfully! 🎉");
 
