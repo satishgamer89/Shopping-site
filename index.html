@@ -534,7 +534,19 @@ section{padding:16px}
   color:#fff;
   font-size:14px;
 }
-  
+
+#cart{
+  padding-bottom:120px; /* space for bottom nav */
+}
+#productPage{
+  padding-bottom:120px;
+}
+
+#cart,
+#productPage{
+  padding-bottom:calc(120px + env(safe-area-inset-bottom));
+}
+
 </style>
 </head>
 
