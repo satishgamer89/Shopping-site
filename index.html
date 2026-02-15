@@ -4,10 +4,6 @@ ui<!DOCTYPE html>
 <meta charset="UTF-8">
 <title>The Aachar Port</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
-<script>
-emailjs.init("BfF9JNty67S40GUJv");
-</script>
 
 
 <style>
@@ -678,7 +674,12 @@ section{padding:16px}
     <small>Logout</small>
   </div>
 </div>
-
+  
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+emailjs.init("BfF9JNty67S40GUJv");
+</script>
+  
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getAuth,onAuthStateChanged,signOut,
