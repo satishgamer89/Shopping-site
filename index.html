@@ -800,19 +800,32 @@ async function loadProducts(){
 }
 
 async function loadOrders(){
+
   const user = auth.currentUser;
   if(!user) return;
 
   const ordersList = document.getElementById("ordersList");
+  if(!ordersList) return;
+
   ordersList.innerHTML = "";
 
-  const q = query(
-  collection(db,"orders"),
-  orderBy("createdAt","desc")
-);
+  let q;
 
-const snap = await getDocs(q);
+  if(user.email === ADMIN){
+    // Admin sees all orders (with sorting)
+    q = query(
+      collection(db,"orders"),
+      orderBy("createdAt","desc")
+    );
+  }else{
+    // Normal user sees only their orders (NO orderBy to avoid index issue)
+    q = query(
+      collection(db,"orders"),
+      where("customer.email","==",user.email)
+    );
+  }
 
+  const snap = await getDocs(q);
 
   if(snap.empty){
     ordersList.innerHTML = "<p>No orders found</p>";
@@ -822,23 +835,39 @@ const snap = await getDocs(q);
   snap.forEach(d=>{
     const o = {id:d.id,...d.data()};
 
-    ordersList.innerHTML += `
-      <div class="order-card">
-        <b>${o.customer.name}</b><br>
-        ${o.customer.phone}<br>
-        ₹${o.total}<br><br>
+    if(user.email === ADMIN){
 
-        Status:
-        <select onchange="updateStatus('${o.id}',this.value)">
-          <option ${o.status==="Pending"?"selected":""}>Pending</option>
-          <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
-          <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
-        </select>
-      </div>
-    `;
+      ordersList.innerHTML += `
+        <div class="order-card">
+          <b>${o.customer.name}</b><br>
+          ${o.customer.phone}<br>
+          ₹${o.total}<br><br>
+
+          Status:
+          <select onchange="updateStatus('${o.id}',this.value)">
+            <option ${o.status==="Pending"?"selected":""}>Pending</option>
+            <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
+            <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
+          </select>
+        </div>
+      `;
+
+    }else{
+
+      ordersList.innerHTML += `
+        <div class="order-card">
+          <b>Status:</b> ${o.status}<br><br>
+          ${o.items.map(i=>`
+            ${i.name} x${i.qty} = ₹${i.price*i.qty}
+          `).join("<br>")}
+          <br><br>
+          <b>Total: ₹${o.total}</b>
+        </div>
+      `;
+    }
   });
 }
-
+  
  async function checkUserOrders(){
 
   const ordersNav = document.getElementById("ordersNav");
