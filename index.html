@@ -683,7 +683,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebas
 import { getAuth,onAuthStateChanged,signOut,
  createUserWithEmailAndPassword,signInWithEmailAndPassword }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore,collection,getDocs,addDoc,deleteDoc,doc,updateDoc }
+import { getFirestore,query,where,collection,getDocs,addDoc,deleteDoc,doc,updateDoc }
 from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const firebaseConfig={
@@ -767,6 +767,11 @@ onAuthStateChanged(auth,u=>{
   u && u.email===ADMIN ? "flex" : "none";
  document.getElementById("ordersNav").style.display =
   u && u.email===ADMIN ? "flex" : "none";
+ if(u){
+    loadUserOrders();
+  }else{
+    document.getElementById("ordersSection").style.display = "none";
+  }
  loadProducts();
  loadOrders();
  show("home");
@@ -816,6 +821,44 @@ async function loadOrders(){
           <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
           <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
         </select>
+      </div>
+    `;
+  });
+}
+
+async function loadUserOrders(){
+
+  const user = auth.currentUser;
+  if(!user) return;
+
+  const q = query(
+    collection(db,"orders"),
+    where("customer.email","==",user.email)
+  );
+
+  const snap = await getDocs(q);
+
+  if(snap.empty){
+    document.getElementById("ordersSection").style.display = "none";
+    return;
+  }
+
+  document.getElementById("ordersSection").style.display = "block";
+
+  const container = document.getElementById("userOrdersList");
+  container.innerHTML = "";
+
+  snap.forEach(doc=>{
+    const o = doc.data();
+
+    container.innerHTML += `
+      <div class="order-card">
+        <b>Status:</b> ${o.status}<br><br>
+        ${o.items.map(i=>`
+          ${i.name} x${i.qty} = ₹${i.price*i.qty}
+        `).join("<br>")}
+        <br><br>
+        <b>Total: ₹${o.total}</b>
       </div>
     `;
   });
@@ -1063,7 +1106,7 @@ window.placeOrder = async () => {
       name,
       phone,
       address,
-      email: user?.email || "guest"
+      email: auth.currentUser?.email || "guest"
     },
     items: cart,
     total: cart.reduce((t,i)=>t+i.price*i.qty,0),
