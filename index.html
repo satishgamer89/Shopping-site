@@ -550,6 +550,92 @@ section{padding:16px}
 #productPage{
   padding-bottom:calc(120px + env(safe-area-inset-bottom));
 }
+/* Orders Section */
+.orders-header {
+  margin-bottom: 20px;
+}
+
+.orders-header h2 {
+  font-size: 24px;
+  color: #ff8c00;
+}
+
+.orders-header p {
+  font-size: 14px;
+  color: #aaa;
+}
+
+.orders-container {
+  display: grid;
+  gap: 15px;
+}
+
+/* Order Card */
+.order-card {
+  background: linear-gradient(145deg,#1e1e1e,#2b2b2b);
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid #333;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+  transition: 0.3s ease;
+}
+
+.order-card:hover {
+  transform: translateY(-3px);
+}
+
+.order-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.order-id {
+  font-size: 13px;
+  color: #888;
+}
+
+.order-status {
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.status-Pending {
+  background: #ff9800;
+  color: #000;
+}
+
+.status-Shipped {
+  background: #2196f3;
+  color: #fff;
+}
+
+.status-Delivered {
+  background: #4caf50;
+  color: #fff;
+}
+
+.order-items {
+  font-size: 14px;
+  margin-top: 10px;
+  line-height: 1.6;
+}
+
+.order-total {
+  margin-top: 12px;
+  font-weight: bold;
+  color: #ff8c00;
+}
+
+.admin-select {
+  margin-top: 10px;
+  padding: 5px;
+  border-radius: 6px;
+  border: none;
+}
 
 </style>
 </head>
@@ -620,10 +706,14 @@ section{padding:16px}
  <button onclick="addProduct()">Save Product</button>
 </section>
 
-<section id="orders" style="display:none">
-  <h2>Orders</h2>
+<section id="orders">
+  <div class="orders-header">
+    <h2>📦 Orders</h2>
+    <p id="ordersSubtitle"></p>
+  </div>
   <div id="ordersList"></div>
 </section>
+
 
 <section id="productPage" style="display:none">
  <button style="margin:12px" onclick="show('home')">←</button>
@@ -804,6 +894,11 @@ async function loadOrders(){
   const user = auth.currentUser;
   if(!user) return;
 
+  document.getElementById("ordersSubtitle").textContent =
+  user.email === ADMIN
+  ? "Manage and update customer orders"
+  : "Track your placed orders";
+
   const ordersList = document.getElementById("ordersList");
   if(!ordersList) return;
 
@@ -833,40 +928,79 @@ async function loadOrders(){
   }
 
   snap.forEach(d=>{
-    const o = {id:d.id,...d.data()};
+  const o = {id:d.id,...d.data()};
 
-    if(user.email === ADMIN){
+  const statusClass = "status-" + o.status;
 
-      ordersList.innerHTML += `
-        <div class="order-card">
-          <b>${o.customer.name}</b><br>
-          ${o.customer.phone}<br>
-          ₹${o.total}<br><br>
+  if(user.email === ADMIN){
 
-          Status:
-          <select onchange="updateStatus('${o.id}',this.value)">
-            <option ${o.status==="Pending"?"selected":""}>Pending</option>
-            <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
-            <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
-          </select>
+    ordersList.innerHTML += `
+      <div class="order-card">
+        
+        <div class="order-top">
+          <div>
+            <b>${o.customer.name}</b><br>
+            ${o.customer.phone}
+          </div>
+          <div class="order-status ${statusClass}">
+            ${o.status}
+          </div>
         </div>
-      `;
 
-    }else{
+        <div class="order-id">
+          Order ID: ${o.id}
+        </div>
 
-      ordersList.innerHTML += `
-        <div class="order-card">
-          <b>Status:</b> ${o.status}<br><br>
+        <div class="order-items">
           ${o.items.map(i=>`
             ${i.name} x${i.qty} = ₹${i.price*i.qty}
           `).join("<br>")}
-          <br><br>
-          <b>Total: ₹${o.total}</b>
         </div>
-      `;
-    }
-  });
+
+        <div class="order-total">
+          Total: ₹${o.total}
+        </div>
+
+        <select class="admin-select"
+          onchange="updateStatus('${o.id}',this.value)">
+          <option ${o.status==="Pending"?"selected":""}>Pending</option>
+          <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
+          <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
+        </select>
+
+      </div>
+    `;
+
+  }else{
+
+    ordersList.innerHTML += `
+      <div class="order-card">
+
+        <div class="order-top">
+          <div class="order-id">
+            Order ID: ${o.id}
+          </div>
+          <div class="order-status ${statusClass}">
+            ${o.status}
+          </div>
+        </div>
+
+        <div class="order-items">
+          ${o.items.map(i=>`
+            ${i.name} x${i.qty} = ₹${i.price*i.qty}
+          `).join("<br>")}
+        </div>
+
+        <div class="order-total">
+          Total: ₹${o.total}
+        </div>
+
+      </div>
+    `;
+  }
+});
 }
+
   
  async function checkUserOrders(){
 
