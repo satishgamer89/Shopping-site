@@ -637,6 +637,22 @@ section{padding:16px}
   border: none;
 }
 
+.delete-btn{
+  margin-top: 10px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 6px;
+  background: #ff4444;
+  color: white;
+  cursor: pointer;
+  font-size: 13px;
+  transition: 0.3s;
+}
+
+.delete-btn:hover{
+  background: #cc0000;
+}
+
 </style>
 </head>
 
@@ -935,41 +951,47 @@ async function loadOrders(){
   if(user.email === ADMIN){
 
     ordersList.innerHTML += `
-      <div class="order-card">
-        
-        <div class="order-top">
-          <div>
-            <b>${o.customer.name}</b><br>
-            ${o.customer.phone}
-          </div>
-          <div class="order-status ${statusClass}">
-            ${o.status}
-          </div>
-        </div>
-
-        <div class="order-id">
-          Order ID: ${o.id}
-        </div>
-
-        <div class="order-items">
-          ${o.items.map(i=>`
-            ${i.name} x${i.qty} = ₹${i.price*i.qty}
-          `).join("<br>")}
-        </div>
-
-        <div class="order-total">
-          Total: ₹${o.total}
-        </div>
-
-        <select class="admin-select"
-          onchange="updateStatus('${o.id}',this.value)">
-          <option ${o.status==="Pending"?"selected":""}>Pending</option>
-          <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
-          <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
-        </select>
-
+  <div class="order-card">
+    
+    <div class="order-top">
+      <div>
+        <b>${o.customer.name}</b><br>
+        ${o.customer.phone}
       </div>
-    `;
+      <div class="order-status status-${o.status}">
+        ${o.status}
+      </div>
+    </div>
+
+    <div class="order-id">
+      Order ID: ${o.id}
+    </div>
+
+    <div class="order-items">
+      ${o.items.map(i=>`
+        ${i.name} x${i.qty} = ₹${i.price*i.qty}
+      `).join("<br>")}
+    </div>
+
+    <div class="order-total">
+      Total: ₹${o.total}
+    </div>
+
+    <select class="admin-select"
+      onchange="updateStatus('${o.id}',this.value)">
+      <option ${o.status==="Pending"?"selected":""}>Pending</option>
+      <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
+      <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
+    </select>
+
+    <button class="delete-btn"
+      onclick="deleteOrder('${o.id}')">
+      🗑 Delete Order
+    </button>
+
+  </div>
+`;
+
 
   }else{
 
@@ -1079,6 +1101,24 @@ window.updateStatus = async (id,status)=>{
   await updateDoc(doc(db,"orders",id), { status });
   loadOrders();
 };
+
+async function deleteOrder(orderId){
+
+  const confirmDelete = confirm("Are you sure you want to delete this order?");
+  if(!confirmDelete) return;
+
+  try{
+    await deleteDoc(doc(db,"orders",orderId));
+
+    alert("Order deleted successfully!");
+    loadOrders(); // refresh list
+
+  }catch(err){
+    console.error(err);
+    alert("Error deleting order");
+  }
+}
+window.deleteOrder = deleteOrder;
 
   
 window.searchProducts = () => {
