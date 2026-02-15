@@ -4,6 +4,11 @@
 <meta charset="UTF-8">
 <title>The Aachar Port</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="https://cdn.jsdelivr.net/npm/emailjs-com@3/dist/email.min.js"></script>
+<script>
+emailjs.init("BfF9JNty67S40GUJv");
+</script>
+
 
 <style>
 :root{
@@ -1071,30 +1076,20 @@ window.placeOrder = async () => {
     // WhatsApp message
 try{
   await addDoc(collection(db,"orders"), orderData);
+const templateParams = {
+  name: name,
+  phone: phone,
+  address: address,
+  items: cart.map(i=>`${i.name} x${i.qty}`).join(", "),
+  total: orderData.total
+};
 
-  const message = `
-🛒 New Order - The Aachar Port
-
-Name: ${name}
-Phone: ${phone}
-Address: ${address}
-
-Items:
-${cart.map(i=>`${i.name} x${i.qty} = ₹${i.price*i.qty}`).join("\n")}
-
-Total: ₹${orderData.total}
-`;
-
-  const whatsappNumber = "918383897693"; // your number
-
-  window.location.href =
-    `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(message)}`;
-
-}catch(err){
-  console.error("Order error:", err);
-  alert("Order failed: " + err.message);
-}
-
+emailjs.send("service_2b1u286","template_e96ktss",templateParams)
+  .then(function() {
+     console.log("Email sent");
+  }, function(error) {
+     console.log("Email failed:", error);
+  });
 
     alert("Order Placed Successfully! 🎉");
 
