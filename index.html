@@ -768,23 +768,9 @@ onAuthStateChanged(auth,u=>{
  document.getElementById("ordersNav").style.display =
   u && u.email===ADMIN ? "flex" : "none";
  loadProducts();
+ loadOrders();
  show("home");
 });
-
-  onAuthStateChanged(auth, async (user) => {
-  if (!user) {
-    alert("Please login as admin");
-    return;
-  }
-
-  if (user.email !== "satishbhattrai54@gmail.com") {
-    alert("Not authorized");
-    return;
-  }
-
-  loadOrders();
-});
-
 
 async function loadProducts(){
  products.innerHTML="";
