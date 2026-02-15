@@ -603,7 +603,7 @@ section{padding:16px}
   font-weight: bold;
 }
 
-.status-Pending {
+.status-Order-Placed {
   background: #ff9800;
   color: #000;
 }
@@ -946,7 +946,7 @@ async function loadOrders(){
   snap.forEach(d=>{
   const o = {id:d.id,...d.data()};
 
-  const statusClass = "status-" + o.status;
+  const statusClass = "status-" + o.status.replace(/\s/g,"-");
 
   if(user.email === ADMIN){
 
@@ -979,7 +979,7 @@ async function loadOrders(){
 
     <select class="admin-select"
       onchange="updateStatus('${o.id}',this.value)">
-      <option ${o.status==="Order Placed"?"selected":""}>Pending</option>
+      <option ${o.status==="Order Placed"?"selected":""}>Order Placed</option>
       <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
       <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
     </select>
