@@ -775,10 +775,8 @@ onAuthStateChanged(auth,u=>{
     }else{
       loadUserOrders();   // normal user
     }
-  }else{
-    document.getElementById("ordersSection").style.display="none";
-  }
  loadProducts();
+ checkUserOrders();
  show("home");
 });
 
@@ -846,6 +844,38 @@ const snap = await getDocs(q);
   });
 }
 
+ async function checkUserOrders(){
+
+  const ordersNav = document.getElementById("ordersNav");
+  if(!ordersNav) return;
+
+  const user = auth.currentUser;
+
+  if(!user){
+    ordersNav.style.display = "none";
+    return;
+  }
+
+  // Admin always sees orders
+  if(user.email === ADMIN){
+    ordersNav.style.display = "flex";
+    return;
+  }
+
+  // Check if user has at least 1 order
+  const q = query(
+    collection(db,"orders"),
+    where("customer.email","==",user.email)
+  );
+
+  const snap = await getDocs(q);
+
+  if(snap.empty){
+    ordersNav.style.display = "none";
+  }else{
+    ordersNav.style.display = "flex";
+  }
+} 
 
 async function loadUserOrders(){
 
@@ -1159,6 +1189,7 @@ emailjs.send("service_2b1u286","template_e96ktss",templateParams)
   });
 
     alert("Order Placed Successfully! 🎉");
+    checkUserOrders();
 
     cart = [];
     renderCart();
