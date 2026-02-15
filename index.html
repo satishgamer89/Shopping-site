@@ -979,7 +979,7 @@ async function loadOrders(){
 
     <select class="admin-select"
       onchange="updateStatus('${o.id}',this.value)">
-      <option ${o.status==="Pending"?"selected":""}>Pending</option>
+      <option ${o.status==="Order Placed"?"selected":""}>Pending</option>
       <option ${o.status==="Shipped"?"selected":""}>Shipped</option>
       <option ${o.status==="Delivered"?"selected":""}>Delivered</option>
     </select>
@@ -1366,7 +1366,7 @@ window.placeOrder = async () => {
     },
     items: cart,
     total: cart.reduce((t,i)=>t+i.price*i.qty,0),
-    status: "Pending", 
+    status: "Order Placed", 
     createdAt: serverTimestamp()
   };
 try{
