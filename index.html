@@ -768,12 +768,13 @@ onAuthStateChanged(auth,u=>{
  document.getElementById("ordersNav").style.display =
   u && u.email===ADMIN ? "flex" : "none";
  if(u){
-    loadUserOrders();
-  }else{
-    document.getElementById("ordersSection").style.display = "none";
+    if(u.email==="satishbhattrai54@gmail.com"){
+      loadOrders();        // admin
+    }else{
+      loadUserOrders();    // normal user
+    }
   }
  loadProducts();
- loadOrders();
  show("home");
 });
 
@@ -802,19 +803,28 @@ async function loadProducts(){
 }
 
 async function loadOrders(){
+  const user = auth.currentUser;
+  if(!user) return;
+
   const ordersList = document.getElementById("ordersList");
   ordersList.innerHTML = "";
 
   const snap = await getDocs(collection(db,"orders"));
 
+  if(snap.empty){
+    ordersList.innerHTML = "<p>No orders found</p>";
+    return;
+  }
+
   snap.forEach(d=>{
-    const o = {id:d.id, ...d.data()};
+    const o = {id:d.id,...d.data()};
 
     ordersList.innerHTML += `
-      <div style="background:#1f120a;padding:12px;margin-bottom:10px;border-radius:12px;">
+      <div class="order-card">
         <b>${o.customer.name}</b><br>
-        📞 ${o.customer.phone}<br>
-        ₹${o.total}<br>
+        ${o.customer.phone}<br>
+        ₹${o.total}<br><br>
+
         Status:
         <select onchange="updateStatus('${o.id}',this.value)">
           <option ${o.status==="Pending"?"selected":""}>Pending</option>
@@ -825,6 +835,7 @@ async function loadOrders(){
     `;
   });
 }
+
 
 async function loadUserOrders(){
 
@@ -838,20 +849,21 @@ async function loadUserOrders(){
 
   const snap = await getDocs(q);
 
+  const section = document.getElementById("ordersSection");
+  const list = document.getElementById("userOrdersList");
+
   if(snap.empty){
-    document.getElementById("ordersSection").style.display = "none";
+    section.style.display = "none";
     return;
   }
 
-  document.getElementById("ordersSection").style.display = "block";
+  section.style.display = "block";
+  list.innerHTML = "";
 
-  const container = document.getElementById("userOrdersList");
-  container.innerHTML = "";
+  snap.forEach(d=>{
+    const o = d.data();
 
-  snap.forEach(doc=>{
-    const o = doc.data();
-
-    container.innerHTML += `
+    list.innerHTML += `
       <div class="order-card">
         <b>Status:</b> ${o.status}<br><br>
         ${o.items.map(i=>`
@@ -863,6 +875,7 @@ async function loadUserOrders(){
     `;
   });
 }
+
   
 window.updateStatus = async (id,status)=>{
   await updateDoc(doc(db,"orders",id), { status });
@@ -1095,6 +1108,11 @@ window.placeOrder = async () => {
   const name = document.getElementById("cName").value;
   const phone = document.getElementById("cPhone").value;
   const address = document.getElementById("cAddress").value;
+
+  if(!auth.currentUser){
+  alert("Please login before placing order");
+  return;
+}
 
   if(!name || !phone || !address){
     alert("Please fill all details");
