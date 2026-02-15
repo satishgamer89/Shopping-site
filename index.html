@@ -809,7 +809,26 @@ const auth=getAuth(app);
 const db=getFirestore(app);
  
 
-let user=null,productsData=[],cart=[],editing=null,currentImages=[],imgIndex=0,autoSlide,touchXStart=0;
+let user=null,productsData=[],editing=null,currentImages=[],imgIndex=0,autoSlide,touchXStart=0;
+
+let cart = [];
+
+function getCartKey(){
+  const u = auth.currentUser;
+  return u ? "cart_" + u.email : "cart_guest";
+}
+
+function loadCart(){
+  const key = getCartKey();
+  const saved = localStorage.getItem(key);
+  cart = saved ? JSON.parse(saved) : [];
+}
+
+function saveCart(){
+  const key = getCartKey();
+  localStorage.setItem(key, JSON.stringify(cart));
+}
+
 
 // ===== ANDROID DOM BIND FIX =====
 const products = document.getElementById("products");
@@ -875,7 +894,10 @@ onAuthStateChanged(auth,u=>{
   u && u.email===ADMIN ? "flex" : "none";
  document.getElementById("ordersNav").style.display =
   u && u.email===ADMIN ? "flex" : "none";
-  
+
+ loadCart();          // ✅ ADD THIS
+ renderCart();        // ✅ ADD THIS
+
  loadProducts();
  checkUserOrders();
  show("home");
@@ -1219,9 +1241,17 @@ pdImg.addEventListener("touchend",e=>{
 window.addToCart=id=>{
  const p=productsData.find(x=>x.id===id);
  const i=cart.find(x=>x.id===id);
- i?i.qty++:cart.push({id,name:p.name,price:p.price,qty:1});
+
+ if(i){
+   i.qty++;
+ }else{
+   cart.push({id,name:p.name,price:p.price,qty:1});
+ }
+
+ saveCart();      // ✅ ADD
  renderCart();
 };
+
 window.addQty=id=>{
  addToCart(id);
  updateQtyUI(id);
@@ -1236,6 +1266,7 @@ window.removeQty=id=>{
   document.getElementById(`btn-${id}`).innerHTML=
    `<button class="add-btn" onclick="addQty('${id}')">ADD</button>`;
  }
+ saveCart();  
  renderCart();
  updateQtyUI(id);
  updateProductQtyUI(id);
@@ -1390,6 +1421,7 @@ emailjs.send("service_2b1u286","template_e96ktss",templateParams)
     checkUserOrders();
 
     cart = [];
+    localStorage.removeItem(getCartKey());  // ✅ ADD
     renderCart();
 
     document.getElementById("checkoutForm").style.display = "none";
