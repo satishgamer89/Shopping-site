@@ -769,12 +769,14 @@ onAuthStateChanged(auth,u=>{
   u && u.email===ADMIN ? "flex" : "none";
  document.getElementById("ordersNav").style.display =
   u && u.email===ADMIN ? "flex" : "none";
- if(u){
+  if(u){
     if(u.email==="satishbhattrai54@gmail.com"){
-      loadOrders();        // admin
+      loadOrders();       // admin
     }else{
-      loadUserOrders();    // normal user
+      loadUserOrders();   // normal user
     }
+  }else{
+    document.getElementById("ordersSection").style.display="none";
   }
  loadProducts();
  show("home");
