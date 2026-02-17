@@ -653,6 +653,90 @@ section{padding:16px}
   background: #cc0000;
 }
 
+ /* ============================= */
+/* ===== DESKTOP FULL SCALE ==== */
+/* ============================= */
+
+@media(min-width:1024px){
+
+  body{
+    font-size:16px;
+  }
+
+  section{
+    max-width:1200px;
+    margin:auto;
+    padding:40px 20px;
+  }
+
+  .products{
+    grid-template-columns:repeat(4,1fr);
+    gap:24px;
+  }
+
+  .card{
+    min-height:320px;
+    padding:18px;
+  }
+
+  .card img{
+    height:180px;
+  }
+
+  .card h3{
+    font-size:16px;
+  }
+
+  .price{
+    font-size:18px;
+  }
+
+  /* Product Page Layout */
+  #productPage{
+    display:flex;
+    gap:40px;
+    max-width:1200px;
+    margin:auto;
+    padding:40px;
+  }
+
+  .carousel{
+    flex:1;
+  }
+
+  .product-info{
+    flex:1;
+    margin-top:0;
+    border-radius:20px;
+    padding:30px;
+  }
+
+  .product-info h2{
+    font-size:28px;
+  }
+
+  .product-price{
+    font-size:26px;
+  }
+
+  .cart-bar{
+    position:static;
+    margin-top:20px;
+    border-radius:16px;
+  }
+
+  /* Orders Section */
+  .orders-container{
+    grid-template-columns:repeat(2,1fr);
+  }
+
+  /* Header spacing */
+  .main-header{
+    padding:20px 60px;
+  }
+
+} 
+
 </style>
 </head>
 
